@@ -1,0 +1,17 @@
+*
+
+!src/
+!src/**
+
+!.github/
+!.github/**
+
+
+!.gitignore
+!CHANGELOG.md
+!deno.json
+!mod.ts
+!README.md
+!LICENSE
+!flake.nix
+!flake.lock
