@@ -567,7 +567,7 @@ const rawUsers = await query<UserRaw>(connectionProvider, userTable)
   .execute() // Warning: Consider using .map() for type transformation
 
 // Suppress warning with explicit raw data usage
-const rawUsers = await query<UserRaw>(connectionProvider, userTable)
+const rawUsers = await query<UserRaw>(connectionProvider, userTable, { warnings: 'suppress' })
   .execute() // Use raw SurrealDB types intentionally
 ```
 
@@ -656,7 +656,7 @@ await connectionProvider.close()
 ### Complex Queries
 
 ```typescript
-// NEW: Chaining multiple operations with raw types
+// Chaining multiple operations with raw types
 const rawResult = await query<UserRaw>(connectionProvider, userTable)
   .where({ active: true })
   .where('created_at', Op.GREATER_THAN, new Date('2024-01-01'))
@@ -670,7 +670,7 @@ const rawResult = await query<UserRaw>(connectionProvider, userTable)
 
 console.log('Complex query raw result:', rawResult)
 
-// EXISTING: Chaining multiple operations with transformation
+// Chaining multiple operations with transformation
 const result = await query<UserRaw, User>(connectionProvider, userTable)
   .where({ active: true })
   .where('created_at', Op.GREATER_THAN, new Date('2024-01-01'))
@@ -689,7 +689,7 @@ console.log('Complex query transformed result:', result)
 ### Custom Mapping
 
 ```typescript
-// NEW: Using utility types and helper functions
+// Using utility types and helper functions
 import { Serialized, createSerializer } from "surql"
 
 type User = Serialized<UserRaw> // Automatic type conversion
@@ -709,7 +709,7 @@ const usersWithAge = await query<UserRaw, User & { age: number }>(connectionProv
   .map(mapUserWithAge)
   .execute()
 
-// EXISTING: Complex mapping with manual conversion (still works)
+// Complex mapping with manual conversion (still works)
 const mapUserWithAgeManual = (raw: UserRaw): User & { age: number } => ({
   id: raw.id.toString(),
   username: raw.username,
@@ -724,7 +724,7 @@ const usersWithAgeManual = await query<UserRaw, User & { age: number }>(connecti
   .execute()
 ```
 
-## 🚀 Performance
+## Performance
 
 SurQL is optimized for performance with:
 
@@ -733,22 +733,7 @@ SurQL is optimized for performance with:
 - **Efficient connection pooling** - Automatic connection reuse
 - **TypeScript optimizations** - Compile-time type checking
 
-### Benchmarks
-
-Run the included benchmarks to see performance characteristics:
-
-```bash
-deno run --allow-net --allow-read benchmarks/performance_test.ts
-```
-
-### Key Changes
-
-- Return types changed from `ResultAsync<T, E>` to `Promise<T>`
-- Error handling uses try/catch instead of `.match()`
-- Connection provider must be provided explicitly
-- Mapping functions are required via `.map()`
-
-## 🧪 Testing
+## Testing
 
 ```bash
 # Run all tests
@@ -761,12 +746,12 @@ deno test src/read_test.ts src/write_test.ts --allow-read --allow-write --allow-
 deno task test:coverage
 ```
 
-## 📝 Examples
+## Examples
 
 ### E-commerce Query
 
 ```typescript
-// NEW: Get premium customers with raw types for quick analysis
+// Get premium customers with raw types for quick analysis
 const rawPremiumCustomers = await query<CustomerRaw>(connectionProvider, customerTable)
   .where({ tier: 'premium', active: true })
   .where('lastOrder', Op.GREATER_THAN, new Date('2024-01-01'))
@@ -774,7 +759,7 @@ const rawPremiumCustomers = await query<CustomerRaw>(connectionProvider, custome
   .limit(100)
   .execute() // Returns CustomerRaw[] with SurrealDB types
 
-// EXISTING: Get premium customers with transformation for UI display
+// Get premium customers with transformation for UI display
 const premiumCustomers = await query<CustomerRaw, Customer>(connectionProvider, customerTable)
   .where({ tier: 'premium', active: true })
   .where('lastOrder', Op.GREATER_THAN, new Date('2024-01-01'))
@@ -783,7 +768,7 @@ const premiumCustomers = await query<CustomerRaw, Customer>(connectionProvider, 
   .map(mapCustomer)
   .execute()
 
-// NEW: Create new order with raw types
+// Create new order with raw types
 const newRawOrder = await create<OrderRaw>(connectionProvider, orderTable, {
   customerId: rawPremiumCustomers[0].id, // Using RecordId directly
   items: [
@@ -795,7 +780,7 @@ const newRawOrder = await create<OrderRaw>(connectionProvider, orderTable, {
 })
   .execute()
 
-// EXISTING: Create new order with transformation
+// Create new order with transformation
 const newOrder = await create<OrderRaw, Order>(connectionProvider, orderTable, {
   customerId: premiumCustomers[0].id, // Using string id from transformed data
   items: [
@@ -812,7 +797,7 @@ const newOrder = await create<OrderRaw, Order>(connectionProvider, orderTable, {
 ### User Management
 
 ```typescript
-// NEW: Bulk user operations with raw types for processing
+// Bulk user operations with raw types for processing
 const rawInactiveUsers = await query<UserRaw>(connectionProvider, userTable)
   .where({ active: false })
   .where('lastLogin', Op.LESS_THAN, new Date('2023-01-01'))
@@ -828,7 +813,7 @@ for (const user of rawInactiveUsers) {
     .execute()
 }
 
-// EXISTING: Bulk user operations with transformation
+// Bulk user operations with transformation
 const users = await query<UserRaw, User>(connectionProvider, userTable)
   .where({ active: false })
   .where('lastLogin', Op.LESS_THAN, new Date('2023-01-01'))
