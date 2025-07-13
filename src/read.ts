@@ -281,7 +281,6 @@ export class ReadQL<R extends { id: RecordId }, T = unknown> extends QueryBuilde
 		const results = await this.limit(1).execute()
 		return results[0]
 	}
-
 }
 
 /**

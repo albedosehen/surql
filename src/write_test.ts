@@ -144,7 +144,6 @@ describe('CreateQL', () => {
 		})
 	})
 
-
 	describe('withContext()', () => {
 		it('should return this for method chaining', () => {
 			const createQL = create(mockConnectionProvider, testTable, { username: 'test' })
@@ -290,7 +289,6 @@ describe('UpdateQL', () => {
 			}
 		})
 	})
-
 })
 
 describe('DeleteQL', () => {
@@ -372,7 +370,6 @@ describe('DeleteQL', () => {
 			}
 		})
 	})
-
 })
 
 describe('Factory functions', () => {

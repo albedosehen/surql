@@ -332,7 +332,6 @@ describe('ReadQL', () => {
 		})
 	})
 
-
 	describe('fluent chaining', () => {
 		it('should support complex fluent chains', async () => {
 			const mockRecordId = new RecordId('users', '123')

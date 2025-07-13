@@ -53,7 +53,6 @@ export class CreateQL<R extends { id: RecordId }, T = unknown> extends QueryBuil
 		// Expect a single result for create operations
 		return Array.isArray(mappedResult) ? mappedResult[0] : mappedResult
 	}
-
 }
 
 /**
@@ -149,7 +148,6 @@ export class UpdateQL<R extends { id: RecordId }, T = unknown> extends QueryBuil
 		// For update operations, we expect a single result
 		return Array.isArray(mappedResult) ? mappedResult[0] : mappedResult
 	}
-
 }
 
 /**
@@ -210,7 +208,6 @@ export class DeleteQL<R extends { id: RecordId }, T = unknown> extends QueryBuil
 		// For delete operations, we expect a single result
 		return Array.isArray(mappedResult) ? mappedResult[0] : mappedResult
 	}
-
 }
 
 /**
