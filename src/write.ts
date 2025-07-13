@@ -54,18 +54,6 @@ export class CreateQL<R extends { id: RecordId }, T = unknown> extends QueryBuil
 		return Array.isArray(mappedResult) ? mappedResult[0] : mappedResult
 	}
 
-	/**
-	 * Execute the create operation and unwrap the result
-	 * @returns - Promise<T> containing mapped created record
-	 * @example
-	 * await create('posts', { title: 'New Post', content: 'This is a new post.' })
-	 *  .unwrap()
-	 * @remarks
-	 * This method is a convenience function that returns the execute() result directly.
-	 */
-	unwrap(): Promise<T> {
-		return this.execute()
-	}
 }
 
 /**
@@ -94,8 +82,6 @@ export class CreateQL<R extends { id: RecordId }, T = unknown> extends QueryBuil
  * It provides a fluent interface for building update queries, allowing you to specify
  * the table, record ID, and data to update. The `execute()` method performs the update
  * operation and returns a ResultAsync containing the updated record.
- * The `unwrap()` method can be used to execute the operation and return the updated record directly,
- * throwing an error if the operation fails.
  */
 export class UpdateQL<R extends { id: RecordId }, T = unknown> extends QueryBuilder<R, T> {
 	private recordId: string
@@ -130,8 +116,8 @@ export class UpdateQL<R extends { id: RecordId }, T = unknown> extends QueryBuil
 	 * @example
 	 * const updateOp = update('users', 'user:123', { age: 31 });
 	 * updateOp.replace(); // Switch to replace mode
-	 * const result = await updateOp.unwrap();
-	 * if (result.isOk())
+	 * const result = await updateOp.execute();
+	 * console.log('Record updated:', result);
 	 *  console.log('Record updated:', result.value);
 	 * else
 	 *  console.error('Error updating record:', result.error);
@@ -164,19 +150,6 @@ export class UpdateQL<R extends { id: RecordId }, T = unknown> extends QueryBuil
 		return Array.isArray(mappedResult) ? mappedResult[0] : mappedResult
 	}
 
-	/**
-	 * Execute the update operation and unwrap the result
-	 *
-	 * @returns - Promise<T> containing mapped updated record
-	 * @example
-	 * const result = await update('posts', 'post:123', { title: 'Updated Title' })
-	 * .unwrap()
-	 * @remarks
-	 * This method is a convenience function that returns the execute() result directly.
-	 */
-	unwrap(): Promise<T> {
-		return this.execute()
-	}
 }
 
 /**
@@ -238,20 +211,6 @@ export class DeleteQL<R extends { id: RecordId }, T = unknown> extends QueryBuil
 		return Array.isArray(mappedResult) ? mappedResult[0] : mappedResult
 	}
 
-	/**
-	 * Execute the delete operation and unwrap the result
-	 *
-	 * @returns - Promise<T> containing mapped deleted record
-	 * @example
-	 * const result = await remove('posts', 'posts:123')
-	 *  .unwrap()
-	 *
-	 * @remarks
-	 * This method is a convenience function that returns the execute() result directly.
-	 */
-	unwrap(): Promise<T> {
-		return this.execute()
-	}
 }
 
 /**

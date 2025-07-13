@@ -144,42 +144,6 @@ describe('CreateQL', () => {
 		})
 	})
 
-	describe('unwrap()', () => {
-		it('should return same result as execute()', async () => {
-			const mockRecordId = new RecordId('users', '123')
-			const mockData = [
-				{ id: mockRecordId, username: 'puffin123', email: 'puffin@example.com', active: true, created_at: new Date() },
-			]
-
-			const connectionStub = stub(mockConnectionProvider, 'getConnection', () =>
-				Promise.resolve({
-					query: () => Promise.resolve([mockData]),
-					close: () => Promise.resolve(),
-				} as unknown as Surreal))
-
-			try {
-				const createQL = create<TestUserRaw, TestUser>(mockConnectionProvider, testTable, {
-					username: 'puffin123',
-					email: 'puffin@example.com',
-					active: true,
-				})
-					.map((raw: TestUserRaw) => ({
-						id: recordIdToString(raw.id),
-						username: raw.username,
-						email: raw.email,
-						active: raw.active,
-						created_at: raw.created_at.toISOString(),
-					}))
-
-				const executeResult = await createQL.execute()
-				const unwrapResult = await createQL.unwrap()
-
-				assertEquals(executeResult, unwrapResult)
-			} finally {
-				connectionStub.restore()
-			}
-		})
-	})
 
 	describe('withContext()', () => {
 		it('should return this for method chaining', () => {
@@ -327,46 +291,6 @@ describe('UpdateQL', () => {
 		})
 	})
 
-	describe('unwrap()', () => {
-		it('should return same result as execute()', async () => {
-			const mockRecordId = new RecordId('users', '123')
-			const mockData = [
-				{
-					id: mockRecordId,
-					username: 'updated_puffin',
-					email: 'puffin@example.com',
-					active: true,
-					created_at: new Date(),
-				},
-			]
-
-			const connectionStub = stub(mockConnectionProvider, 'getConnection', () =>
-				Promise.resolve({
-					query: () => Promise.resolve([mockData]),
-					close: () => Promise.resolve(),
-				} as unknown as Surreal))
-
-			try {
-				const updateQL = update<TestUserRaw, TestUser>(mockConnectionProvider, testTable, 'users:123', {
-					username: 'updated_puffin',
-				})
-					.map((raw: TestUserRaw) => ({
-						id: recordIdToString(raw.id),
-						username: raw.username,
-						email: raw.email,
-						active: raw.active,
-						created_at: raw.created_at.toISOString(),
-					}))
-
-				const executeResult = await updateQL.execute()
-				const unwrapResult = await updateQL.unwrap()
-
-				assertEquals(executeResult, unwrapResult)
-			} finally {
-				connectionStub.restore()
-			}
-		})
-	})
 })
 
 describe('DeleteQL', () => {
@@ -449,44 +373,6 @@ describe('DeleteQL', () => {
 		})
 	})
 
-	describe('unwrap()', () => {
-		it('should return same result as execute()', async () => {
-			const mockRecordId = new RecordId('users', '123')
-			const mockData = [
-				{
-					id: mockRecordId,
-					username: 'deleted_user',
-					email: 'deleted@example.com',
-					active: false,
-					created_at: new Date(),
-				},
-			]
-
-			const connectionStub = stub(mockConnectionProvider, 'getConnection', () =>
-				Promise.resolve({
-					query: () => Promise.resolve([mockData]),
-					close: () => Promise.resolve(),
-				} as unknown as Surreal))
-
-			try {
-				const deleteQL = remove<TestUserRaw, TestUser>(mockConnectionProvider, testTable, 'users:123')
-					.map((raw: TestUserRaw) => ({
-						id: recordIdToString(raw.id),
-						username: raw.username,
-						email: raw.email,
-						active: raw.active,
-						created_at: raw.created_at.toISOString(),
-					}))
-
-				const executeResult = await deleteQL.execute()
-				const unwrapResult = await deleteQL.unwrap()
-
-				assertEquals(executeResult, unwrapResult)
-			} finally {
-				connectionStub.restore()
-			}
-		})
-	})
 })
 
 describe('Factory functions', () => {

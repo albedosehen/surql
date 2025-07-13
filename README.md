@@ -168,10 +168,6 @@ const firstUser = await query<UserRaw, User>(connectionProvider, userTable)
   .map(mapUser)
   .first()
 
-// Use unwrap() for direct Promise access (works with both patterns)
-const users = await query<UserRaw, User>(connectionProvider, userTable)
-  .map(mapUser)
-  .unwrap()
 ```
 
 #### Advanced Filtering

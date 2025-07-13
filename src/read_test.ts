@@ -332,38 +332,6 @@ describe('ReadQL', () => {
 		})
 	})
 
-	describe('unwrap()', () => {
-		it('should return same result as execute()', async () => {
-			const mockRecordId = new RecordId('users', '123')
-			const mockData = [
-				{ id: mockRecordId, username: 'puffin123', email: 'puffin@example.com', active: true, created_at: new Date() },
-			]
-
-			const connectionStub = stub(mockConnectionProvider, 'getConnection', () =>
-				Promise.resolve({
-					query: () => Promise.resolve([mockData]),
-					close: () => Promise.resolve(),
-				} as unknown as Surreal))
-
-			try {
-				const readQL = query<TestUserRaw, TestUser>(mockConnectionProvider, testTable)
-					.map((raw: TestUserRaw) => ({
-						id: recordIdToString(raw.id),
-						username: raw.username,
-						email: raw.email,
-						active: raw.active,
-						created_at: raw.created_at.toISOString(),
-					}))
-
-				const executeResult = await readQL.execute()
-				const unwrapResult = await readQL.unwrap()
-
-				assertEquals(executeResult, unwrapResult)
-			} finally {
-				connectionStub.restore()
-			}
-		})
-	})
 
 	describe('fluent chaining', () => {
 		it('should support complex fluent chains', async () => {

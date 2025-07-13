@@ -282,19 +282,6 @@ export class ReadQL<R extends { id: RecordId }, T = unknown> extends QueryBuilde
 		return results[0]
 	}
 
-	/**
-	 * Execute the query and unwrap the result
-	 *
-	 * @returns - Promise<T[]> containing mapped result records
-	 * @example
-	 * const users = await query('users')
-	 *  .where({ status: 'Active' })
-	 *  .orderBy('created_at', SortDirection.DESC)
-	 *  .unwrap() // users will be an array of active user records
-	 */
-	unwrap(): Promise<T[]> {
-		return this.execute()
-	}
 }
 
 /**

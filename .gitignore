@@ -6,7 +6,6 @@
 !.github/
 !.github/**
 
-
 !.gitignore
 !CHANGELOG.md
 !deno.json
