@@ -6,7 +6,7 @@ on:
 
 jobs:
   check:
-    uses: ./.github/workflows/code_quality_check.yml
+    uses: ./.github/workflows/check.yml
 
   test:
     uses: ./.github/workflows/test.yml
