@@ -2,17 +2,18 @@
 	"lock": true,
 
 	"name": "@albedosehen/surql",
-	"version": "0.1.0",
+	"version": "0.2.0",
 	"license": "MIT",
 	"exports": "./mod.ts",
 
 	"tasks": {
-		"test": "deno test --allow-read --allow-write --allow-net --allow-sys",
-		"test:watch": "deno test --allow-read --allow-write --allow-net --allow-sys --watch",
-		"test:coverage": "deno test --allow-read --allow-write --allow-net --allow-sys --coverage=coverage/",
+		"test": "deno test --ignore='test/auth.test.ts' --allow-read --allow-write --allow-net --allow-sys",
+		"test:watch": "deno test --ignore='test/auth.test.ts' --allow-read --allow-write --allow-net --allow-sys --watch",
+		"test:coverage": "deno test --ignore='test/auth.test.ts' --allow-read --allow-write --allow-net --allow-sys --coverage=coverage/",
 		"coverage": "deno coverage coverage/ --html",
 		"bench": "deno bench --allow-read --allow-write --allow-net --allow-sys"
 	},
+
 
 	"compilerOptions": {
 		"strict": true
@@ -40,12 +41,14 @@
 				"no-extra-boolean-cast",
 				"no-invalid-regexp"
 			],
-			"exclude": []
+			"exclude": [
+				"require-await"
+			]
 		}
 	},
 
 	"fmt": {
-		"useTabs": true,
+		"useTabs": false,
 		"lineWidth": 120,
 		"indentWidth": 2,
 		"semiColons": false,

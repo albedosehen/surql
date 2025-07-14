@@ -1,12 +1,12 @@
 import { assert, assertEquals } from '@std/assert'
 import { describe, it } from '@std/testing/bdd'
 import { stub } from '@std/testing/mock'
-import { query, ReadQL } from './read.ts'
-import { Op, SortDirection } from './base.ts'
-import type { ConnectionProvider } from './base.ts'
+import { query, ReadQL } from '../src/crud/read.ts'
+import { Op, SortDirection } from '../src/crud/base.ts'
+import type { ConnectionProvider } from '../src/crud/base.ts'
 import type { Surreal } from 'surrealdb'
 import { RecordId } from 'surrealdb'
-import { recordIdToString } from './utils.ts'
+import { recordIdToString } from '../src/utils.ts'
 
 // Mock connection provider for testing
 const mockConnectionProvider: ConnectionProvider = {

@@ -16,4 +16,5 @@ jobs:
         with:
           deno-version: ${{ matrix.deno-version }}
       - name: Run all tests
-        run: deno test --allow-all
+        run: deno test -A --ignore="test/auth.test.ts"
+

@@ -1,17 +1,17 @@
 import { assert, assertEquals, assertRejects } from '@std/assert'
 import { describe, it } from '@std/testing/bdd'
 import { stub } from '@std/testing/mock'
-import { type ConnectionConfig, SurrealConnectionManager } from './connection.ts'
+import { type ConnectionConfig, SurrealConnectionManager } from '../src/connection.ts'
 import Surreal from 'surrealdb'
 
-// Test connection config
+// Test connection config - using environment variables for security
 const testConfig: ConnectionConfig = {
-	host: 'localhost',
-	port: '8000',
-	namespace: 'test',
-	database: 'test',
-	username: 'root',
-	password: 'root',
+	host: Deno.env.get('SURQL_TEST_HOST') || 'localhost',
+	port: Deno.env.get('SURQL_TEST_PORT') || '8000',
+	namespace: Deno.env.get('SURQL_TEST_NAMESPACE') || 'test',
+	database: Deno.env.get('SURQL_TEST_DATABASE') || 'test',
+	username: Deno.env.get('SURQL_TEST_USERNAME') || 'testuser',
+	password: Deno.env.get('SURQL_TEST_PASSWORD') || 'testpass',
 }
 
 describe('SurrealConnectionManager', () => {
@@ -28,7 +28,12 @@ describe('SurrealConnectionManager', () => {
 			const signinStub = stub(
 				Surreal.prototype,
 				'signin',
-				() => Promise.resolve('header.eyJleHAiOjE2MDAwMDAwMDAsIklEIjoidGVzdCJ9.signature'),
+				() => {
+					// Create a proper JWT with valid header
+					const header = btoa(JSON.stringify({ typ: 'JWT', alg: 'HS256' }))
+					const payload = btoa(JSON.stringify({ exp: Math.floor(Date.now() / 1000) + 3600, ID: 'test' }))
+					return Promise.resolve(`${header}.${payload}.signature`)
+				}
 			)
 			const useStub = stub(Surreal.prototype, 'use', () => Promise.resolve(true as const))
 
@@ -49,8 +54,9 @@ describe('SurrealConnectionManager', () => {
 			const futureExp = Math.floor(Date.now() / 1000) + (10 * 365 * 24 * 60 * 60) // 10 years from now
 			const signinStub = stub(Surreal.prototype, 'signin', () => {
 				// Create a proper JWT with future expiration
+				const header = btoa(JSON.stringify({ typ: 'JWT', alg: 'HS256' }))
 				const payload = btoa(JSON.stringify({ exp: futureExp, ID: 'test' }))
-				return Promise.resolve(`header.${payload}.signature`)
+				return Promise.resolve(`${header}.${payload}.signature`)
 			})
 			const useStub = stub(Surreal.prototype, 'use', () => Promise.resolve(true as const))
 
@@ -108,7 +114,11 @@ describe('SurrealConnectionManager', () => {
 			const signinStub = stub(
 				Surreal.prototype,
 				'signin',
-				() => Promise.resolve('header.eyJleHAiOjE2MDAwMDAwMDAsIklEIjoidGVzdCJ9.signature'),
+				() => {
+					const header = btoa(JSON.stringify({ typ: 'JWT', alg: 'HS256' }))
+					const payload = btoa(JSON.stringify({ exp: Math.floor(Date.now() / 1000) + 3600, ID: 'test' }))
+					return Promise.resolve(`${header}.${payload}.signature`)
+				},
 			)
 			const useStub = stub(Surreal.prototype, 'use', () => Promise.reject(new Error('Database not found')))
 
@@ -133,7 +143,11 @@ describe('SurrealConnectionManager', () => {
 			const signinStub = stub(
 				Surreal.prototype,
 				'signin',
-				() => Promise.resolve('header.eyJleHAiOjE2MDAwMDAwMDAsIklEIjoidGVzdCJ9.signature'),
+				() => {
+					const header = btoa(JSON.stringify({ typ: 'JWT', alg: 'HS256' }))
+					const payload = btoa(JSON.stringify({ exp: Math.floor(Date.now() / 1000) + 3600, ID: 'test' }))
+					return Promise.resolve(`${header}.${payload}.signature`)
+				},
 			)
 			const useStub = stub(Surreal.prototype, 'use', () => Promise.resolve(true as const))
 
@@ -167,7 +181,11 @@ describe('SurrealConnectionManager', () => {
 			const signinStub = stub(
 				Surreal.prototype,
 				'signin',
-				() => Promise.resolve('header.eyJleHAiOjE2MDAwMDAwMDAsIklEIjoidGVzdCJ9.signature'),
+				() => {
+					const header = btoa(JSON.stringify({ typ: 'JWT', alg: 'HS256' }))
+					const payload = btoa(JSON.stringify({ exp: Math.floor(Date.now() / 1000) + 3600, ID: 'test' }))
+					return Promise.resolve(`${header}.${payload}.signature`)
+				},
 			)
 			const useStub = stub(Surreal.prototype, 'use', () => Promise.resolve(true as const))
 			const closeStub = stub(Surreal.prototype, 'close', () => Promise.resolve(true as const))
@@ -203,7 +221,11 @@ describe('SurrealConnectionManager', () => {
 			const signinStub = stub(
 				Surreal.prototype,
 				'signin',
-				() => Promise.resolve('header.eyJleHAiOjE2MDAwMDAwMDAsIklEIjoidGVzdCJ9.signature'),
+				() => {
+					const header = btoa(JSON.stringify({ typ: 'JWT', alg: 'HS256' }))
+					const payload = btoa(JSON.stringify({ exp: Math.floor(Date.now() / 1000) + 3600, ID: 'test' }))
+					return Promise.resolve(`${header}.${payload}.signature`)
+				},
 			)
 			const useStub = stub(Surreal.prototype, 'use', () => Promise.resolve(true as const))
 			const closeStub = stub(Surreal.prototype, 'close', () => Promise.reject(new Error('Close failed')))
@@ -249,7 +271,11 @@ describe('SurrealConnectionManager', () => {
 			const signinStub = stub(
 				Surreal.prototype,
 				'signin',
-				() => Promise.resolve('header.eyJleHAiOjE2MDAwMDAwMDAsIklEIjoidGVzdCJ9.signature'),
+				() => {
+					const header = btoa(JSON.stringify({ typ: 'JWT', alg: 'HS256' }))
+					const payload = btoa(JSON.stringify({ exp: Math.floor(Date.now() / 1000) + 3600, ID: 'test' }))
+					return Promise.resolve(`${header}.${payload}.signature`)
+				},
 			)
 			const useStub = stub(Surreal.prototype, 'use', () => Promise.resolve(true as const))
 
@@ -281,7 +307,11 @@ describe('SurrealConnectionManager', () => {
 			const signinStub = stub(
 				Surreal.prototype,
 				'signin',
-				() => Promise.resolve('header.eyJleHAiOjE2MDAwMDAwMDAsIklEIjoidGVzdCJ9.signature'),
+				() => {
+					const header = btoa(JSON.stringify({ typ: 'JWT', alg: 'HS256' }))
+					const payload = btoa(JSON.stringify({ exp: Math.floor(Date.now() / 1000) + 3600, ID: 'test' }))
+					return Promise.resolve(`${header}.${payload}.signature`)
+				},
 			)
 			const useStub = stub(Surreal.prototype, 'use', () => Promise.resolve(true as const))
 
@@ -349,7 +379,11 @@ describe('SurrealConnectionManager', () => {
 			const signinStub = stub(
 				Surreal.prototype,
 				'signin',
-				() => Promise.resolve('header.eyJleHAiOjE2MDAwMDAwMDAsIklEIjoidGVzdCJ9.signature'),
+				() => {
+					const header = btoa(JSON.stringify({ typ: 'JWT', alg: 'HS256' }))
+					const payload = btoa(JSON.stringify({ exp: Math.floor(Date.now() / 1000) + 3600, ID: 'test' }))
+					return Promise.resolve(`${header}.${payload}.signature`)
+				},
 			)
 			const useStub = stub(Surreal.prototype, 'use', () => Promise.resolve(true as const))
 			const closeStub = stub(Surreal.prototype, 'close', () => Promise.reject(new Error('Close error')))

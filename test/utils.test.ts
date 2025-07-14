@@ -1,7 +1,6 @@
 import { assertEquals } from '@std/assert'
 import { RecordId } from 'surrealdb'
-import type { Serialized } from './utilities.ts'
-import { createSerializer } from './utilities.ts'
+import { createSerializer, type Serialized } from '../src/utils.ts'
 
 Deno.test('utilities_test.ts', async (t) => {
 	await t.step('Serialized<T> type', async (t) => {

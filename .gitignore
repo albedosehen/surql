@@ -3,6 +3,9 @@
 !src/
 !src/**
 
+!test/
+!test/**
+
 !.github/
 !.github/**
 
@@ -11,6 +14,15 @@
 !deno.json
 !mod.ts
 !README.md
+!**.md
 !LICENSE
 !flake.nix
 !flake.lock
+
+debug_*
+debug.*
+*.debug
+.env
+.env.local
+*.log
+*.tmp
