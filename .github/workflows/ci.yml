@@ -15,3 +15,6 @@ jobs:
     if: github.ref == 'refs/heads/main'
     needs: [check, test]
     uses: ./.github/workflows/publish.yml
+    permissions:
+      contents: read
+      id-token: write
