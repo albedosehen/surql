@@ -1,5 +1,10 @@
 {
-	"lock": false,
+	"lock": true,
+
+	"name": "@albedosehen/surql",
+	"version": "0.1.0",
+	"license": "MIT",
+	"exports": "./mod.ts",
 
 	"tasks": {
 		"test": "deno test --allow-read --allow-write --allow-net --allow-sys",
