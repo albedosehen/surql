@@ -1,5 +1,9 @@
 # SurQL - Promise-Based SurrealDB Query Builder
 
+[![JSR Version](https://img.shields.io/jsr/v/@albedosehen/surql)](https://jsr.io/@albedosehen/surql)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/dotwin/dotwin)
+
 SurQL is a modern, type-safe query builder for SurrealDB designed for Deno. It provides a fluent interface for building complex queries using native JavaScript Promises, eliminating external dependencies while maintaining excellent developer experience.
 
 ## ✨ Features
@@ -299,7 +303,7 @@ const premiumCustomers = await client.query('customer_orders')
 
 ## API Reference
 
-### Authentication (Phase 1)
+### Authentication
 
 #### Authentication Methods
 
@@ -356,8 +360,6 @@ await client.invalidate()
 const isLoggedIn = client.isAuthenticated()
 const currentToken = client.getCurrentToken()
 ```
-
-### Advanced CRUD Operations (Phase 1)
 
 #### Merge Operations
 
@@ -437,8 +439,6 @@ const newRecord = await client.upsert('logs', {
 })
   .execute()
 ```
-
-### Enhanced Query Builder (Phase 1)
 
 #### GROUP BY and Aggregations
 
@@ -1438,4 +1438,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**SurQL** - Type-safe, Promise-native SurrealDB queries for modern TypeScript applications.
+![Static Badge](https://img.shields.io/badge/made_with_%E2%9D%A4%EF%B8%8F-green)
