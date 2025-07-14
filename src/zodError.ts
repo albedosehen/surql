@@ -1,5 +1,18 @@
 import { $ZodError, type $ZodIssue } from '@zod/core'
 
+interface ZodMappingErrorJSON {
+	name: string
+	message: string
+	issues: $ZodIssue[]
+	stack: string | undefined
+}
+
+interface SurrealDbErrorJSON {
+	name: string
+	message: string
+	stack: string | undefined
+}
+
 export class ZodMappingError extends $ZodError {
 	public context?: string
 
@@ -13,7 +26,7 @@ export class ZodMappingError extends $ZodError {
 		this.context = context
 	}
 
-	toJSON() {
+	toJSON(): ZodMappingErrorJSON {
 		return {
 			name: this.name,
 			message: this.message,
@@ -86,7 +99,7 @@ export class SurrealDbError extends BaseError {
 		this.name = 'SurrealDbError'
 	}
 
-	toJSON() {
+	toJSON(): SurrealDbErrorJSON {
 		return {
 			name: this.name,
 			message: this.message,
