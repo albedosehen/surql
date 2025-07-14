@@ -13,4 +13,9 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v4
-      - run: deno publish
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Publish to JSR
+        run: deno publish
