@@ -10,52 +10,50 @@ SurQL is a modern, type-safe query builder for SurrealDB designed for Deno. It p
 
 ### Core Features
 
-- **🚀 Native Promises**: Built with standard JavaScript Promises - no external dependencies
-- **🦕 Deno First**: Designed specifically for Deno with proper import conventions
-- **🔒 Type Safe**: Full TypeScript support with generic types and strict typing
-- **⚡ High Performance**: No abstraction overhead - direct Promise execution
-- **🔗 Fluent Interface**: Chainable methods for readable query construction
-- **🎯 Zero Dependencies**: Minimal footprint with no external dependencies
-- **🧠 Smart Defaults**: T = R defaults allow omitting type parameters when no transformation needed
-- **🛠️ Utility Types**: Automated type conversion with `Serialized<T>` and helper functions
+- **Native Promises**: Built with standard JavaScript Promises - no external dependencies
+- **Deno First**: Designed specifically for Deno with proper import conventions
+- **Type Safe**: Full TypeScript support with generic types and strict typing
+- **High Performance**: No abstraction overhead - direct Promise execution
+- **Fluent Interface**: Chainable methods for readable query construction
+- **Zero Dependencies**: Minimal footprint with no external dependencies
+- **Smart Defaults**: T = R defaults allow omitting type parameters when no transformation needed
+- **Utility Types**: Automated type conversion with `Serialized<T>` and helper functions
 
-### 🔐 Authentication & Session Management (Phase 1)
+### Authentication & Session Management
 
-- **🔑 Multi-Level Authentication**: Root, Namespace, Database, and Scope-level authentication
-- **🎫 JWT Token Management**: Automatic token lifecycle with refresh capabilities
-- **👤 Session Management**: Persistent session state with info(), invalidate() methods
-- **🔒 Secure Signup/Signin**: Complete authentication flow with comprehensive error handling
-- **⚠️ Rich Error Types**: Specific authentication errors (SessionExpired, InvalidCredentials, etc.)
+- **Multi-Level Authentication**: Root, Namespace, Database, and Scope-level authentication
+- **JWT Token Management**: Automatic token lifecycle with refresh capabilities
+- **Session Management**: Persistent session state with info(), invalidate() methods
+- **Secure Signup/Signin**: Complete authentication flow with comprehensive error handling
+- **Rich Error Types**: Specific authentication errors (SessionExpired, InvalidCredentials, etc.)
 
-### 🛠️ Advanced CRUD Operations (Phase 1)
+### Advanced CRUD Operations
 
-- **🔄 Merge Operations**: Partial data updates preserving existing fields
-- **📝 JSON Patch Support**: RFC 6902 compliant patch operations (add, remove, replace, move, copy, test)
-- **⚡ Upsert Operations**: Smart insert-or-update with conflict resolution
-- **🎯 Fluent Builder API**: Chainable methods for complex data operations
+- **Merge Operations**: Partial data updates preserving existing fields
+- **JSON Patch Support**: RFC 6902 compliant patch operations (add, remove, replace, move, copy, test)
+- **Upsert Operations**: Smart insert-or-update with conflict resolution
+- **Fluent Builder API**: Chainable methods for complex data operations
 
-### 📊 Enhanced Query Builder (Phase 1)
+### Enhanced Query Builder
 
-- **📈 GROUP BY Support**: Advanced grouping with multiple field support
-- **🔍 HAVING Conditions**: Filtered aggregations with fluent syntax
-- **🧮 Aggregation Functions**: count(), sum(), avg(), min(), max() with automatic aliasing
-- **📄 Enhanced Pagination**: Traditional limit/offset plus page() method
-- **🔗 Capability Composition**: Mix and match query capabilities as needed
+- **GROUP BY Support**: Advanced grouping with multiple field support
+- **HAVING Conditions**: Filtered aggregations with fluent syntax
+- **Aggregation Functions**: count(), sum(), avg(), min(), max() with automatic aliasing
+- **Enhanced Pagination**: Traditional limit/offset plus page() method
+- **Capability Composition**: Mix and match query capabilities as needed
 
 ### Quality & Testing
 
-- **🧪 Well Tested**: Comprehensive test suite with 95%+ coverage (1,970+ test lines)
-- **📚 Well Documented**: Complete examples and migration guides
-- **🛡️ Security Focused**: Input validation and injection prevention
-- **🔄 Backward Compatible**: All existing APIs remain unchanged
+- **Well Tested**: Comprehensive test suite with 95%+ coverage (1,970+ test lines)
+- **Well Documented**: Complete examples and migration guides
+- **Security Focused**: Input validation and injection prevention
+- **Backward Compatible**: All existing APIs remain unchanged
 
-## 📖 Documentation
+## Documentation
 
-- **[API Reference](./API.md)** - Complete API documentation for all Phase 1 features
 - **[Changelog](./CHANGELOG.md)** - Detailed release notes and migration information
-- **[Implementation Guide](./IMPLEMENTATION_PHASE_1.md)** - Technical implementation details
 
-## 📦 Installation
+## Installation
 
 ### Using Deno
 
@@ -98,7 +96,7 @@ const client = new SurQLClient({
 })
 ```
 
-### Authentication (Phase 1)
+### Authentication
 
 ```typescript
 // Root user authentication
@@ -222,7 +220,7 @@ try {
 }
 ```
 
-### Advanced CRUD Operations (Phase 1)
+### Advanced CRUD Operations Examples
 
 ```typescript
 // Merge operations - partial updates
@@ -263,7 +261,7 @@ const user = await client.upsert('users', {
   .execute()
 ```
 
-### Enhanced Query Builder (Phase 1)
+### Enhanced Query Builder Examples
 
 ```typescript
 // GROUP BY and aggregations
@@ -303,7 +301,7 @@ const premiumCustomers = await client.query('customer_orders')
 
 ## API Reference
 
-### Authentication
+### Authentication Examples
 
 #### Authentication Methods
 
@@ -976,9 +974,9 @@ const serializer = createSerializer<PostRaw>()
 
 ## 👾 Error Handling
 
-SurQL uses standard JavaScript Promise patterns with enhanced error types for Phase 1 features:
+SurQL uses standard JavaScript Promise patterns with enhanced error types.
 
-### Authentication Errors (Phase 1)
+### Authentication Errors
 
 ```typescript
 import {
@@ -1023,7 +1021,7 @@ try {
 }
 ```
 
-### CRUD Operation Errors (Phase 1)
+### CRUD Operation Errors
 
 ```typescript
 import { PatchOperationError } from "surql"
@@ -1200,7 +1198,7 @@ deno test src/read_test.ts src/write_test.ts --allow-read --allow-write --allow-
 deno task test:coverage
 ```
 
-## 🔒 Security Considerations (Phase 1)
+## 🔒 Security Considerations
 
 ### Authentication Security
 
@@ -1251,27 +1249,6 @@ try {
 } catch (error) {
   // Invalid field names throw validation errors
 }
-```
-
-## 🔄 Migration Guide (Phase 1)
-
-### Upgrading from Previous Versions
-
-**Backward Compatibility**: All existing APIs remain unchanged. New Phase 1 features are additive.
-
-```typescript
-// ✅ Existing code continues to work unchanged
-const users = await query<UserRaw, User>(connectionProvider, userTable)
-  .where({ active: true })
-  .map(mapUser)
-  .execute()
-
-// ✅ New client-based API (recommended for new code)
-const client = new SurQLClient(config)
-const users = await client.query<UserRaw, User>('users')
-  .where({ active: true })
-  .map(mapUser)
-  .execute()
 ```
 
 ### New Authentication Features

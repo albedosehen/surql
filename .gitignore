@@ -12,6 +12,7 @@
 !.gitignore
 !CHANGELOG.md
 !deno.json
+!deno.lock
 !mod.ts
 !README.md
 !LICENSE
