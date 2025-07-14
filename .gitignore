@@ -14,7 +14,6 @@
 !deno.json
 !mod.ts
 !README.md
-!**.md
 !LICENSE
 !flake.nix
 !flake.lock
