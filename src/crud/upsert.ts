@@ -1,7 +1,7 @@
+import { intoSurQlError } from '../utils/surrealError.ts'
 import type { RecordId } from 'surrealdb'
+import type { SurrealDbTable } from '../crud/types.ts'
 import { type ConnectionProvider, QueryBuilder, type QueryOptions } from './base.ts'
-import type { SurrealDbTable } from '../types.ts'
-import { intoSurrealDbError } from '../surrealError.ts'
 
 /**
  * A builder class for UPSERT operations in SurrealDB
@@ -42,11 +42,11 @@ export class UpsertQL<R extends { id: RecordId }, T = unknown> extends QueryBuil
    * @returns this - For method chaining
    * @example
    * const user = await client.upsert('users', {
-   *   username: 'john_doe',
-   *   email: 'john@example.com',
-   *   name: 'John Doe'
+   *   username: 'shon_doe',
+   *   email: 'shon@example.com',
+   *   name: 'Shon Doe'
    * })
-   *   .withId('user:john_doe')
+   *   .withId('user:shon_doe')
    *   .map(mapUser)
    *   .execute()
    */
@@ -65,9 +65,9 @@ export class UpsertQL<R extends { id: RecordId }, T = unknown> extends QueryBuil
    * @returns this - For method chaining
    * @example
    * const user = await client.upsert('users', {
-   *   username: 'jane_doe',
-   *   email: 'jane@example.com',
-   *   name: 'Jane Doe'
+   *   username: 'shon_doe',
+   *   email: 'shon@example.com',
+   *   name: 'Shon Doe'
    * })
    *   .onConflict('username', 'email')
    *   .map(mapUser)
@@ -147,7 +147,7 @@ export class UpsertQL<R extends { id: RecordId }, T = unknown> extends QueryBuil
       const records = await this.executeQuery<R[]>(query, params)
 
       if (!records || records.length === 0) {
-        throw intoSurrealDbError('Upsert operation returned no records')
+        throw intoSurQlError('Upsert operation returned no records')
       }
 
       const mappedResult = this.mapResults(records, true)
@@ -158,7 +158,7 @@ export class UpsertQL<R extends { id: RecordId }, T = unknown> extends QueryBuil
       if (e instanceof Error && e.message.includes('returned no records')) {
         throw e // Re-throw our specific error
       }
-      throw intoSurrealDbError('Upsert operation failed:', e)
+      throw intoSurQlError('Upsert operation failed:', e)
     }
   }
 

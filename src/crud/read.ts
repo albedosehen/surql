@@ -8,7 +8,7 @@ import {
   type QueryOptions,
   SortDirection,
 } from './base.ts'
-import type { SurrealDbTable } from '../types.ts'
+import type { SurrealDbTable } from '../crud/types.ts'
 
 /**
  * A fluent and object-style query builder for SELECT operations using SurrealDB.

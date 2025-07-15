@@ -1,15 +1,43 @@
 import Surreal from 'surrealdb'
-import { validateAndDecodeJWTPayload } from './utils.ts'
-import { intoSurrealDbError } from './surrealError.ts'
-import { assertValidation, validateConnectionConfig } from './validation.ts'
-import type { AuthCredentials, AuthToken, SessionInfo, SignupData } from './auth/types.ts'
+import { assertArrayLength } from '../utils/asserts.ts'
+import { assertValidation, validateConnectionConfig } from '../utils/validators.ts'
+import { intoSurQlError } from '../utils/surrealError.ts'
+import { SIGNIN_FIELDS_BY_TYPE } from './constants.ts'
+import { validateAndDecodeJWTPayload } from '../utils/helpers.ts'
+import type { AuthCredentials, AuthToken, SessionInfo, SignupData } from './types.ts'
 import {
   AuthenticationError,
   InvalidCredentialsError,
   InvalidTokenError,
   SessionExpiredError,
   SignupError,
-} from './auth/errors.ts'
+} from './errors.ts'
+import type { AnyAuth } from 'surrealdb'
+
+/**
+ * Build sign-in parameters from the authentication credentials
+ * @param credentials - Authentication credentials object
+ * @template T - Type of credentials (AuthCredentials)
+ * @returns Record<string, unknown> - Sign-in parameters
+ */
+export function buildSigninParams<T extends AuthCredentials>(credentials: T): AnyAuth {
+  const type = credentials.type
+  const fields = SIGNIN_FIELDS_BY_TYPE[type]
+  if (!fields) throw new InvalidCredentialsError()
+
+  // deno-lint-ignore no-explicit-any
+  let params = Object.fromEntries(fields.map((key) => [key, (credentials as any)[key]]))
+  if (type === 'scope') {
+    const extra = Object.entries(credentials)
+      .filter(([k]) => !fields.includes(k) && k !== 'type')
+      .reduce((obj, [k, v]) => {
+        obj[k] = v
+        return obj
+      }, {} as Record<string, unknown>)
+    params = { ...params, ...extra }
+  }
+  return params as AnyAuth
+}
 
 /**
  * Configuration for SurrealDB connection
@@ -36,7 +64,7 @@ interface SurrealJwt {
 /**
  * Internal connection manager that handles SurrealDB connections
  * Uses singleton pattern per configuration to ensure connection reuse
- * Enhanced with authentication state management for Phase 1
+ * Specifically, it handles authentication, session management, and token validation
  */
 export class SurrealConnectionManager {
   private db: InstanceType<typeof Surreal> | null = null
@@ -76,7 +104,7 @@ export class SurrealConnectionManager {
       try {
         return await this.connectionPromise
       } catch (e) {
-        throw intoSurrealDbError('Connection promise failed:', e)
+        throw intoSurQlError('Connection promise failed:', e)
       }
     }
 
@@ -100,7 +128,7 @@ export class SurrealConnectionManager {
       return result
     } catch (e) {
       this.connectionPromise = null
-      throw intoSurrealDbError('Connection failed:', e)
+      throw intoSurQlError('Connection failed:', e)
     }
   }
 
@@ -138,7 +166,7 @@ export class SurrealConnectionManager {
       const { exp, ID: _ID } = await validateAndDecodeJWTPayload<SurrealJwt>(token)
       this.expiresAt = exp * 1_000
     } catch (e) {
-      throw intoSurrealDbError('Invalid JWT token received from SurrealDB:', e)
+      throw intoSurQlError('Invalid JWT token received from SurrealDB:', e)
     }
   }
 
@@ -182,7 +210,7 @@ export class SurrealConnectionManager {
       // For WebSocket protocols, return the base URL
       return baseUrl
     } catch (e) {
-      throw intoSurrealDbError('Failed to construct connection endpoint:', e)
+      throw intoSurQlError('Failed to construct connection endpoint:', e)
     }
   }
 
@@ -194,69 +222,21 @@ export class SurrealConnectionManager {
   async signin(credentials: AuthCredentials): Promise<AuthToken> {
     try {
       const db = await this.getConnection()
+      const signinParams = buildSigninParams(credentials)
 
-      let token: string
-
-      switch (credentials.type) {
-        case 'root': {
-          token = await db.signin({
-            username: credentials.username,
-            password: credentials.password,
-          })
-          break
-        }
-        case 'namespace': {
-          token = await db.signin({
-            namespace: credentials.namespace,
-            username: credentials.username,
-            password: credentials.password,
-          })
-          break
-        }
-        case 'database': {
-          token = await db.signin({
-            namespace: credentials.namespace,
-            database: credentials.database,
-            username: credentials.username,
-            password: credentials.password,
-          })
-          break
-        }
-        case 'scope': {
-          // For scope authentication, we need to pass additional fields
-          const scopeParams = {
-            namespace: credentials.namespace,
-            database: credentials.database,
-            scope: credentials.scope,
-            ...Object.fromEntries(
-              Object.entries(credentials).filter(([key]) => !['type', 'namespace', 'database', 'scope'].includes(key)),
-            ),
-          }
-          token = await db.signin(scopeParams)
-          break
-        }
-        default: {
-          throw new InvalidCredentialsError()
-        }
-      }
-
+      const token = await db.signin(signinParams)
       if (!token) {
         throw new InvalidCredentialsError()
       }
 
-      // Parse and validate the JWT token structure
-      // We need to bypass the automatic expiration check in validateAndDecodeJWTPayload
-      // and do it manually so we can store expired tokens and check later
-      try {
-        // First try normal validation
-        const { exp, ID } = await validateAndDecodeJWTPayload<SurrealJwt>(token)
+      const setSession = (payload: SurrealJwt) => {
+        const { exp, ID } = payload
         const expiresAt = new Date(exp * 1000)
 
         this.authToken = { token, expires: expiresAt }
         this.expiresAt = exp * 1000
         this.currentCredentials = credentials
 
-        // Extract session info from credentials and token
         this.sessionInfo = {
           id: ID,
           type: credentials.type,
@@ -267,33 +247,20 @@ export class SurrealConnectionManager {
         }
 
         return this.authToken
+      }
+
+      // Parse and validate JWT, handle expired tokens
+      try {
+        const payload = await validateAndDecodeJWTPayload<SurrealJwt>(token)
+        return setSession(payload)
       } catch (e) {
-        // Handle specific JWT expiration error from validateAndDecodeJWTPayload
         if (e instanceof Error && e.message === 'JWT token has expired') {
-          // For expired tokens, manually parse without validation to get the data
           try {
             const parts = token.split('.')
-            if (parts.length !== 3) throw new Error('Invalid token format')
+            assertArrayLength({ input: parts, length: 3, context: 'JWT token parts' })
 
             const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')))
-            const { exp, ID } = payload
-            const expiresAt = new Date(exp * 1000)
-
-            this.authToken = { token, expires: expiresAt }
-            this.expiresAt = exp * 1000
-            this.currentCredentials = credentials
-
-            // Extract session info from credentials and token
-            this.sessionInfo = {
-              id: ID,
-              type: credentials.type,
-              namespace: 'namespace' in credentials ? credentials.namespace : undefined,
-              database: 'database' in credentials ? credentials.database : undefined,
-              scope: 'scope' in credentials ? credentials.scope : undefined,
-              expires: expiresAt,
-            }
-
-            return this.authToken
+            return setSession(payload)
           } catch {
             throw new InvalidTokenError()
           }
@@ -301,10 +268,7 @@ export class SurrealConnectionManager {
         throw new InvalidTokenError()
       }
     } catch (e) {
-      if (e instanceof AuthenticationError) {
-        throw e
-      }
-      // Re-throw unexpected errors as-is to preserve test mocks
+      if (e instanceof AuthenticationError) throw e
       throw e
     }
   }
@@ -494,7 +458,7 @@ export class SurrealConnectionManager {
         this.currentCredentials = null
       }
     } catch (e) {
-      throw intoSurrealDbError('Failed to close connection:', e)
+      throw intoSurQlError('Failed to close connection:', e)
     }
   }
 }

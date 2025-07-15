@@ -2,18 +2,17 @@
 	"lock": true,
 
 	"name": "@albedosehen/surql",
-	"version": "0.2.2",
+	"version": "0.2.3",
 	"license": "MIT",
 	"exports": "./mod.ts",
 
 	"tasks": {
-		"test": "deno test --ignore='test/auth.test.ts' --allow-read --allow-write --allow-net --allow-sys",
-		"test:watch": "deno test --ignore='test/auth.test.ts' --allow-read --allow-write --allow-net --allow-sys --watch",
-		"test:coverage": "deno test --ignore='test/auth.test.ts' --allow-read --allow-write --allow-net --allow-sys --coverage=coverage/",
+		"test": "deno test --ignore='src/test/auth.test.ts' --allow-read --allow-write --allow-net --allow-sys",
+		"test:watch": "deno test --ignore='src/test/auth.test.ts' --allow-read --allow-write --allow-net --allow-sys --watch",
+		"test:coverage": "deno test --ignore='src/test/auth.test.ts' --allow-read --allow-write --allow-net --allow-sys --coverage=coverage/",
 		"coverage": "deno coverage coverage/ --html",
 		"bench": "deno bench --allow-read --allow-write --allow-net --allow-sys"
 	},
-
 
 	"compilerOptions": {
 		"strict": true
@@ -67,8 +66,8 @@
 		"@std/testing/mock": "jsr:@std/testing@^1.0.0/mock",
 		"@std/streams": "jsr:@std/streams@^1.0.0",
 		"@std/async": "jsr:@std/async@^1.0.0",
-		"surrealdb": "npm:surrealdb@1.3.2",
-		"@zod/core": "npm:@zod/core@0.11.6"
+		"@zod/core": "npm:@zod/core@0.11.6",
+		"surrealdb": "npm:surrealdb@1.3.2"
 	},
 
 	"exclude": ["dist/"]

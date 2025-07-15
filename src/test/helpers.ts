@@ -1,6 +1,5 @@
-import type { ConnectionProvider } from '../src/crud/base.ts'
-import type { Surreal } from 'surrealdb'
-import { RecordId } from 'surrealdb'
+import type { ConnectionProvider } from '../crud/base.ts'
+import { RecordId, type Surreal } from 'surrealdb'
 
 /**
  * Shared test utilities for write operations
@@ -8,11 +7,11 @@ import { RecordId } from 'surrealdb'
 
 // Mock connection provider for testing
 export const mockConnectionProvider: ConnectionProvider = {
-	getConnection: () =>
-		Promise.resolve({
-			query: <T>() => Promise.resolve([]) as Promise<T>,
-			close: () => Promise.resolve(),
-		} as unknown as Surreal),
+  getConnection: () =>
+    Promise.resolve({
+      query: <T>() => Promise.resolve([]) as Promise<T>,
+      close: () => Promise.resolve(),
+    } as unknown as Surreal),
 }
 
 // Test table for queries
@@ -20,19 +19,19 @@ export const testTable = 'users'
 
 // Test data types
 export interface TestUser {
-	id: string
-	username: string
-	email: string
-	active: boolean
-	created_at: string
+  id: string
+  username: string
+  email: string
+  active: boolean
+  created_at: string
 }
 
 export interface TestUserRaw {
-	id: RecordId
-	username: string
-	email: string
-	active: boolean
-	created_at: Date
+  id: RecordId
+  username: string
+  email: string
+  active: boolean
+  created_at: Date
 }
 
 /**
@@ -41,11 +40,11 @@ export interface TestUserRaw {
  * @returns Connection stub function
  */
 export function createMockConnectionStub(mockData: unknown[]) {
-	return () =>
-		Promise.resolve({
-			query: () => Promise.resolve([mockData]),
-			close: () => Promise.resolve(),
-		} as unknown as Surreal)
+  return () =>
+    Promise.resolve({
+      query: () => Promise.resolve([mockData]),
+      close: () => Promise.resolve(),
+    } as unknown as Surreal)
 }
 
 /**
@@ -53,11 +52,11 @@ export function createMockConnectionStub(mockData: unknown[]) {
  * @returns Connection stub function that returns empty results
  */
 export function createEmptyMockConnectionStub() {
-	return () =>
-		Promise.resolve({
-			query: () => Promise.resolve([[]]),
-			close: () => Promise.resolve(),
-		} as unknown as Surreal)
+  return () =>
+    Promise.resolve({
+      query: () => Promise.resolve([[]]),
+      close: () => Promise.resolve(),
+    } as unknown as Surreal)
 }
 
 /**
@@ -66,13 +65,13 @@ export function createEmptyMockConnectionStub() {
  * @returns Mapped test user
  */
 export function mapTestUser(raw: TestUserRaw): TestUser {
-	return {
-		id: raw.id.toString().replace(/⟨(.+?)⟩/g, '$1'),
-		username: raw.username,
-		email: raw.email,
-		active: raw.active,
-		created_at: raw.created_at.toISOString(),
-	}
+  return {
+    id: raw.id.toString().replace(/⟨(.+?)⟩/g, '$1'),
+    username: raw.username,
+    email: raw.email,
+    active: raw.active,
+    created_at: raw.created_at.toISOString(),
+  }
 }
 
 /**
@@ -81,14 +80,14 @@ export function mapTestUser(raw: TestUserRaw): TestUser {
  * @returns TestUserRaw object
  */
 export function createTestUserRaw(overrides: Partial<TestUserRaw> = {}): TestUserRaw {
-	return {
-		id: new RecordId('users', '123'),
-		username: 'testuser',
-		email: 'test@example.com',
-		active: true,
-		created_at: new Date(),
-		...overrides,
-	}
+  return {
+    id: new RecordId('users', '123'),
+    username: 'testuser',
+    email: 'test@example.com',
+    active: true,
+    created_at: new Date(),
+    ...overrides,
+  }
 }
 
 /**
@@ -97,16 +96,16 @@ export function createTestUserRaw(overrides: Partial<TestUserRaw> = {}): TestUse
  * @returns Object containing the warning message and test result
  */
 export async function captureConsoleWarnings<T>(testFn: () => Promise<T>): Promise<{ warning: string; result: T }> {
-	const originalWarn = console.warn
-	let warningMessage = ''
-	console.warn = (message: string) => {
-		warningMessage = message
-	}
+  const originalWarn = console.warn
+  let warningMessage = ''
+  console.warn = (message: string) => {
+    warningMessage = message
+  }
 
-	try {
-		const result = await testFn()
-		return { warning: warningMessage, result }
-	} finally {
-		console.warn = originalWarn
-	}
+  try {
+    const result = await testFn()
+    return { warning: warningMessage, result }
+  } finally {
+    console.warn = originalWarn
+  }
 }

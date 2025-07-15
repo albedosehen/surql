@@ -1,3 +1,4 @@
+import { assertNumber, assertNumberLessThan, assertPositiveNumber } from '../utils/asserts.ts'
 import { QueryBuilder } from '../crud/base.ts'
 import type { RecordId } from 'surrealdb'
 
@@ -46,7 +47,7 @@ export abstract class PaginationQueryBuilder<R extends { id: RecordId }, T> exte
    *   .execute()
    */
   offset(count: number): this {
-    this.validateNonNegativeInteger(count, 'offset')
+    this.validatePositiveInteger(count, 'offset')
     this.offsetValue = count
     return this
   }
@@ -158,30 +159,8 @@ export abstract class PaginationQueryBuilder<R extends { id: RecordId }, T> exte
    * @param fieldName - Name of the field for error messages
    */
   private validatePositiveInteger(value: number, fieldName: string): void {
-    if (!Number.isInteger(value) || value <= 0) {
-      throw new Error(`${fieldName} must be a positive integer, got: ${value}`)
-    }
-
-    // Reasonable upper limit to prevent resource exhaustion
-    if (value > 1000000) {
-      throw new Error(`${fieldName} cannot exceed 1,000,000, got: ${value}`)
-    }
-  }
-
-  /**
-   * Validate that a number is a non-negative integer
-   * @private
-   * @param value - Value to validate
-   * @param fieldName - Name of the field for error messages
-   */
-  private validateNonNegativeInteger(value: number, fieldName: string): void {
-    if (!Number.isInteger(value) || value < 0) {
-      throw new Error(`${fieldName} must be a non-negative integer, got: ${value}`)
-    }
-
-    // Reasonable upper limit to prevent resource exhaustion
-    if (value > 10000000) {
-      throw new Error(`${fieldName} cannot exceed 10,000,000, got: ${value}`)
-    }
+    assertNumber(value, fieldName)
+    assertPositiveNumber(value, fieldName)
+    assertNumberLessThan(value, 1000000, fieldName) // I'm not sure what the upper limit should be, but 1 million seems reasonable
   }
 }

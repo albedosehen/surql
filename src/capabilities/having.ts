@@ -1,4 +1,7 @@
+import { assertMaxStringLength, assertNoDangerousSQL, assertNoEmptyString, assertString } from '../utils/asserts.ts'
 import { Op, QueryBuilder } from '../crud/base.ts'
+import { PATTERNS } from '../constants.ts'
+import { validateFieldName } from '../utils/validators.ts'
 import type { RecordId } from 'surrealdb'
 
 /**
@@ -39,7 +42,10 @@ export abstract class HavingQueryBuilder<R extends { id: RecordId }, T> extends 
   having(conditionOrField: string, operator?: Op, value?: unknown): this {
     if (operator !== undefined && value !== undefined) {
       // Fluent style: having('field', Op.GREATER_THAN, value)
-      this.validateFieldName(conditionOrField)
+      const fieldValidationResult = validateFieldName(conditionOrField)
+      if (!fieldValidationResult.success) {
+        throw new Error(fieldValidationResult.error)
+      }
       const paramName = `h${this.havingConditions.length}`
       if ('params' in this && typeof this.params === 'object') {
         ;(this.params as Record<string, unknown>)[paramName] = value
@@ -88,72 +94,18 @@ export abstract class HavingQueryBuilder<R extends { id: RecordId }, T> extends 
   }
 
   /**
-   * Validate field name to prevent injection attacks
-   * @private
-   * @param field - Field name to validate
-   */
-  private validateFieldName(field: string): void {
-    if (typeof field !== 'string' || field.length === 0) {
-      throw new Error('Field name must be a non-empty string')
-    }
-
-    // Allow alphanumeric characters, underscores, dots, parentheses, asterisk for functions
-    const fieldNamePattern = /^[a-zA-Z0-9_.():*-]+$/
-    if (!fieldNamePattern.test(field)) {
-      throw new Error(
-        `Invalid field name: ${field}. Field names can only contain letters, numbers, dots, underscores, colons, hyphens, and parentheses`,
-      )
-    }
-
-    // Prevent common SQL injection patterns
-    const dangerousPatterns = [
-      /;/, // Statement terminator
-      /--/, // SQL comments
-      /\/\*/, // Block comments
-      /\*\//, // Block comments
-      /\bunion\b/i, // UNION attacks
-      /\bselect\b/i, // SELECT injections
-      /\binsert\b/i, // INSERT injections
-      /\bupdate\b/i, // UPDATE injections
-      /\bdelete\b/i, // DELETE injections
-      /\bdrop\b/i, // DROP injections
-    ]
-
-    for (const pattern of dangerousPatterns) {
-      if (pattern.test(field)) {
-        throw new Error(`Potentially dangerous field name detected: ${field}`)
-      }
-    }
-  }
-
-  /**
    * Validate HAVING condition to prevent injection attacks
    * @private
    * @param condition - HAVING condition to validate
    */
   private validateHavingCondition(condition: string): void {
-    if (typeof condition !== 'string' || condition.length === 0) {
-      throw new Error('HAVING condition must be a non-empty string')
-    }
-
-    // Check for extremely long conditions that could be DOS attacks
-    if (condition.length > 1000) {
-      throw new Error('HAVING condition cannot exceed 1000 characters')
-    }
-
-    // Prevent dangerous SQL injection patterns in conditions
-    const dangerousPatterns = [
-      /;.*(?:union|select|insert|update|delete|drop)/i,
-      /'\s*(?:union|select|insert|update|delete|drop)/i,
-      /"\s*(?:union|select|insert|update|delete|drop)/i,
-      /\/\*.*\*\//,
-      /--.*$/m,
-    ]
-
-    for (const pattern of dangerousPatterns) {
-      if (pattern.test(condition)) {
-        throw new Error('Potentially dangerous SQL pattern detected in HAVING condition')
-      }
-    }
+    assertString(condition, 'HAVING condition')
+    assertNoEmptyString({ input: condition, context: 'HAVING condition' })
+    assertMaxStringLength({ input: condition, context: 'HAVING condition', maxLength: 1000 })
+    assertNoDangerousSQL({
+      input: condition,
+      context: 'HAVING condition',
+      patterns: PATTERNS.SQL.CLAUSE_INJECTION_PATTERNS,
+    })
   }
 }

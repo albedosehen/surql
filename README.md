@@ -55,22 +55,22 @@ SurQL is a modern, type-safe query builder for SurrealDB designed for Deno. It p
 
 ## Installation
 
-### Using Deno
+### Simply import from JSR in your file
 
 ```typescript
-// Import directly from JSR (when published)
-import { query, create, update, remove, SurrealConnectionManager, Serialized, createSerializer } from "jsr:@/surql"
+// Import directly from JSR
+import { query, create, update, remove, SurrealConnectionManager, Serialized, createSerializer } from "jsr:@albedosehen/surql"
 
-// Or import from URL
+// Or import from URL (when published)
 import { query, create, update, remove, SurrealConnectionManager, Serialized, createSerializer } from "https://deno.land/x/surql/mod.ts"
 ```
 
-### Using deno.json
+### Or update your imports and create an alias in `deno.json`
 
 ```json
 {
   "imports": {
-    "surql": "jsr:https://deno.land/x/surql/mod.ts"
+    "surql": "jsr:@albedosehen/surql"
   }
 }
 ```
@@ -81,50 +81,37 @@ import { query, create, update, remove, SurrealConnectionManager, Serialized, cr
 
 ## ⚡ Quick Start
 
-### Setting up Connection
+### Connecting to your SurrealDB server
 
-```typescript
-import { SurQLClient } from "surql"
-
-const client = new SurQLClient({
-  host: 'localhost',
-  port: '8000',
-  namespace: 'your_namespace',
-  database: 'your_database',
-  username: 'your_username',
-  password: 'your_password'
-})
-```
-
-### Authentication
+**Note:** Always use environment variables for sensitive information like credentials.
 
 ```typescript
 // Root user authentication
 const rootToken = await client.signin({
   type: 'root',
-  username: 'root',
-  password: 'password'
+  username: Deno.env.get('SURREALDB_ROOT_USERNAME') || 'root',
+  password: Deno.env.get('SURREALDB_ROOT_PASSWORD') || 'password'
 })
 
 // Scope user authentication
 const userToken = await client.signin({
   type: 'scope',
-  namespace: 'myapp',
-  database: 'production',
+  namespace: Deno.env.get('SURREALDB_NAMESPACE') || 'dev',
+  database: Deno.env.get('SURREALDB_DATABASE') || 'myapp',
   scope: 'user',
-  username: 'john@example.com',
-  password: 'mypassword'
+  username: Deno.env.get('SURREALDB_USER_USERNAME') || 'username',
+  password: Deno.env.get('SURREALDB_USER_PASSWORD') || 'password'
 })
 
 // Sign up new scope user
 const newUserToken = await client.signup({
-  namespace: 'myapp',
-  database: 'production',
+  namespace: Deno.env.get('SURREALDB_NAMESPACE') || 'dev',
+  database: Deno.env.get('SURREALDB_DATABASE') || 'myapp',
   scope: 'user',
-  username: 'jane@example.com',
-  password: 'newpassword',
-  email: 'jane@example.com',
-  name: 'Jane Doe'
+  username: 'randomuser',
+  password: 'randompassword',
+  email: 'random@example.com',
+  name: 'Random User'
 })
 
 // Check authentication status
@@ -140,9 +127,16 @@ await client.invalidate()
 
 ### Basic Query Example
 
+Making a query with SurQL is straightforward. You can use the `query()` method to fetch data from your SurrealDB instance.
+
 ```typescript
-import { SurQLClient } from "surql"
-import { RecordId } from "surrealdb"
+  const result = await client.query(conn, 'posts', { warnings: 'suppress' })
+    .where({ published: true })
+    .execute()
+```
+
+```typescript
+import { SurQLClient, RecordId } from "surql"
 
 // Define your types
 interface UserRaw {

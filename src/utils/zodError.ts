@@ -1,15 +1,10 @@
+import { PATTERNS } from '../constants.ts'
 import { $ZodError, type $ZodIssue } from '@zod/core'
 
 interface ZodMappingErrorJSON {
   name: string
   message: string
   issues: $ZodIssue[]
-  stack: string | undefined
-}
-
-interface SurrealDbErrorJSON {
-  name: string
-  message: string
   stack: string | undefined
 }
 
@@ -24,6 +19,8 @@ function isProductionEnvironment(): boolean {
 
 /**
  * Sanitize Zod error messages to prevent sensitive information exposure
+ * Note: This safeguard does not replace proper developer security practices.
+ * It is a simple measure to avoid accidental leaks in error messages.
  * @param message - The error message to sanitize
  * @returns Sanitized error message
  */
@@ -31,43 +28,22 @@ function sanitizeZodErrorMessage(message: string): string {
   const includeDetails = !isProductionEnvironment()
 
   if (!includeDetails) {
-    // In production, sanitize sensitive patterns
-    const sensitivePatterns = [
-      /password/i,
-      /token/i,
-      /secret/i,
-      /key/i,
-      /credentials/i,
-      /authorization/i,
-      /authentication/i,
-      /jwt/i,
-      /api.?key/i,
-      /connection.?string/i,
-    ]
-
-    for (const pattern of sensitivePatterns) {
+    // Sanitize in production
+    for (const pattern of PATTERNS.SANITIZE.SENSITIVE) {
       if (pattern.test(message)) {
         return 'Invalid input provided'
       }
     }
 
-    // Remove internal paths and technical details
-    const internalPatterns = [
-      /file:\/\/.*$/gm,
-      /at.*\([^)]*\)/g,
-      /\b[A-Za-z]:\\[^\\]+\\.*$/gm,
-      /\/[^\/\s]+\/[^\/\s]+\/.*$/gm,
-    ]
-
     let sanitized = message
-    for (const pattern of internalPatterns) {
+    for (const pattern of PATTERNS.PATHS) {
       sanitized = sanitized.replace(pattern, '[internal]')
     }
 
     return sanitized
   }
 
-  // In development, return full message but redact obvious secrets
+  // Sanitize in development
   const secretPatterns = [
     /(password|token|secret|key)(\s*[:=]\s*)([^\s]+)/gi,
     /(bearer\s+)([a-zA-Z0-9\-._~+/]+=*)/gi,
@@ -164,21 +140,4 @@ export const intoZodMappingError = (error: unknown, context?: string): ZodMappin
 
   const baseZodError = intoZodError(error)
   return new ZodMappingError(baseZodError.issues, context)
-}
-
-import { SurrealDbError as BaseError } from 'surrealdb'
-
-export class SurrealDbError extends BaseError {
-  constructor(message: string) {
-    super(message)
-    this.name = 'SurrealDbError'
-  }
-
-  toJSON(): SurrealDbErrorJSON {
-    return {
-      name: this.name,
-      message: this.message,
-      stack: this.stack,
-    }
-  }
 }

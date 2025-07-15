@@ -1,9 +1,4 @@
 /**
- * Authentication interfaces and types for SurQL Phase 1
- * Supports root, namespace, database, and scope-level authentication
- */
-
-/**
  * Root user credentials for system-level access
  */
 export interface RootCredentials {
@@ -41,7 +36,7 @@ export interface ScopeCredentials {
   namespace: string
   database: string
   scope: string
-  [key: string]: unknown // Additional scope-specific fields
+  [key: string]: unknown // User-defined fields for scope authentication
 }
 
 /**
@@ -92,11 +87,10 @@ export interface EnhancedConnectionConfig {
   port: string
   namespace: string
   database: string
-  username?: string // Optional for token-based auth
-  password?: string // Optional for token-based auth
+  username?: string // For token-based auth
+  password?: string // For token-based auth
   useSSL?: boolean
-  protocol?: 'http' | 'https' | 'ws' | 'wss'
-  // New authentication fields
+  protocol?: 'http' | 'https' | 'ws' | 'wss' // SurrealDB supports these protocols
   authToken?: string
   autoRefresh?: boolean
   tokenRefreshBuffer?: number // Minutes before expiry to refresh

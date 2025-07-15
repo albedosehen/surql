@@ -1,12 +1,12 @@
-import type { RecordId, Surreal } from 'surrealdb'
-import { type ConnectionConfig, SurrealConnectionManager } from './connection.ts'
-import { ReadQL } from './crud/read.ts'
 import { CreateQL, DeleteQL, UpdateQL } from './crud/write.ts'
 import { MergeQL } from './crud/merge.ts'
-import { type PatchOperation, PatchQL } from './crud/patch.ts'
+import { ReadQL } from './crud/read.ts'
 import { UpsertQL } from './crud/upsert.ts'
+import { type PatchOperation, PatchQL } from './crud/patch.ts'
+import { type ConnectionConfig, SurrealConnectionManager } from './auth/connection.ts'
 import type { ConnectionProvider, QueryOptions } from './crud/base.ts'
-import type { SurrealDbTable } from './types.ts'
+import type { RecordId, Surreal } from 'surrealdb'
+import type { SurrealDbTable } from './crud/types.ts'
 import type { AuthCredentials, AuthToken, SessionInfo, SignupData } from './auth/types.ts'
 
 /**

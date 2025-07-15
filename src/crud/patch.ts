@@ -1,7 +1,7 @@
+import { intoSurQlError } from '../utils/surrealError.ts'
 import type { RecordId } from 'surrealdb'
 import { type ConnectionProvider, QueryBuilder, type QueryOptions } from './base.ts'
-import type { SurrealDbTable } from '../types.ts'
-import { intoSurrealDbError } from '../surrealError.ts'
+import type { SurrealDbTable } from '../crud/types.ts'
 
 /**
  * JSON Patch operation types following RFC 6902
@@ -123,7 +123,7 @@ export class PatchQL<R extends { id: RecordId }, T = unknown> extends QueryBuild
       const records = await this.executeQuery<R[]>(query, params)
 
       if (!records || records.length === 0) {
-        throw intoSurrealDbError('Patch operation returned no records - record may not exist')
+        throw intoSurQlError('Patch operation returned no records - record may not exist')
       }
 
       const mappedResult = this.mapResults(records, true)
@@ -137,7 +137,7 @@ export class PatchQL<R extends { id: RecordId }, T = unknown> extends QueryBuild
       if (e instanceof Error && e.message.includes('returned no records')) {
         throw e // Re-throw our specific error
       }
-      throw intoSurrealDbError('Patch operation failed:', e)
+      throw intoSurQlError('Patch operation failed:', e)
     }
   }
 

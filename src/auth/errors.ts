@@ -1,9 +1,4 @@
 /**
- * Authentication error classes for SurQL Phase 1
- * Provides specific error types for different authentication scenarios
- */
-
-/**
  * Base authentication error class
  */
 export class AuthenticationError extends Error {

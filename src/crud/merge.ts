@@ -1,7 +1,7 @@
+import { intoSurQlError } from '../utils/surrealError.ts'
 import type { RecordId } from 'surrealdb'
 import { type ConnectionProvider, QueryBuilder, type QueryOptions } from './base.ts'
-import type { SurrealDbTable } from '../types.ts'
-import { intoSurrealDbError } from '../surrealError.ts'
+import type { SurrealDbTable } from '../crud/types.ts'
 
 /**
  * A builder class for MERGE operations in SurrealDB
@@ -56,25 +56,24 @@ export class MergeQL<R extends { id: RecordId }, T = unknown> extends QueryBuild
    */
   async execute(): Promise<T> {
     try {
-      // Build the MERGE query with parameters
       const query = `UPDATE ${this.targetId} MERGE $data`
       const params = { data: this.mergeData, ...this.params }
 
       const records = await this.executeQuery<R[]>(query, params)
 
       if (!records || records.length === 0) {
-        throw intoSurrealDbError('Merge operation returned no records - record may not exist')
+        throw intoSurQlError('Merge operation returned no records - record may not exist')
       }
 
       const mappedResult = this.mapResults(records, true)
 
-      // For merge operations, we expect a single result
+      // For merge operations, expect a single result
       return Array.isArray(mappedResult) ? mappedResult[0] : mappedResult
     } catch (e) {
       if (e instanceof Error && e.message.includes('returned no records')) {
-        throw e // Re-throw our specific error
+        throw e // Re-throw it
       }
-      throw intoSurrealDbError('Merge operation failed:', e)
+      throw intoSurQlError('Merge operation failed:', e)
     }
   }
 }

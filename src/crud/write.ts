@@ -1,7 +1,7 @@
+import { intoSurQlError } from '../utils/surrealError.ts'
 import { type RecordId } from 'surrealdb'
 import { type ConnectionProvider, QueryBuilder, type QueryOptions } from './base.ts'
-import { intoSurrealDbError } from '../surrealError.ts'
-import type { SurrealDbTable } from '../types.ts'
+import type { SurrealDbTable } from '../crud/types.ts'
 
 /**
  * A builder class for Create operations in SurrealDB
@@ -44,12 +44,12 @@ export class CreateQL<R extends { id: RecordId }, T = unknown> extends QueryBuil
     const record = await this.executeQuery<R[]>(`CREATE ${this.table} CONTENT $data`, { data: this.data })
 
     if (!record || record.length === 0) {
-      throw intoSurrealDbError('Create operation returned no records')
+      throw intoSurQlError('Create operation returned no records')
     }
 
     const mappedResult = this.mapResults(record, true)
 
-    // TODO(@me): Handle multiple records if needed
+    // TODO(@albedosehen): Handle multiple records edge-case if I encounter it
     // Expect a single result for create operations
     return Array.isArray(mappedResult) ? mappedResult[0] : mappedResult
   }
@@ -141,7 +141,7 @@ export class UpdateQL<R extends { id: RecordId }, T = unknown> extends QueryBuil
     const records = await this.executeQuery<R[]>(query, { data: this.data })
 
     if (!records || records.length === 0) {
-      throw intoSurrealDbError('Update operation returned no records')
+      throw intoSurQlError('Update operation returned no records')
     }
 
     const mappedResult = this.mapResults(records, true)
@@ -201,7 +201,7 @@ export class DeleteQL<R extends { id: RecordId }, T = unknown> extends QueryBuil
     const record = await this.executeQuery<R[]>(`DELETE ${this.recordId}`, {})
 
     if (!record || record.length === 0) {
-      throw intoSurrealDbError('Delete operation returned no records')
+      throw intoSurQlError('Delete operation returned no records')
     }
 
     const mappedResult = this.mapResults(record, true)

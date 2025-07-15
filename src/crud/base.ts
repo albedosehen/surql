@@ -1,6 +1,6 @@
-import { intoZodMappingError } from '../zodError.ts'
-import { intoSurrealDbError } from '../surrealError.ts'
-import type { SurrealDbTable } from '../types.ts'
+import { intoSurQlError } from '../utils/surrealError.ts'
+import { intoZodMappingError } from '../utils/zodError.ts'
+import type { SurrealDbTable } from '../crud/types.ts'
 import type { RecordId, Surreal } from 'surrealdb'
 
 /**
@@ -249,7 +249,7 @@ export abstract class QueryBuilder<R extends { id: RecordId }, T = unknown> {
       const results = await db.query<TResult[]>(query, params) as TResult[][]
       return results[0] || [] as TResult[]
     } catch (e) {
-      throw intoSurrealDbError('Query execution failed:', e)
+      throw intoSurQlError('Query execution failed:', e)
     }
   }
 }

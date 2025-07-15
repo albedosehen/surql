@@ -1,4 +1,5 @@
 import { QueryBuilder } from '../crud/base.ts'
+import { validateFieldName } from '../utils/validators.ts'
 import type { RecordId } from 'surrealdb'
 
 /**
@@ -146,40 +147,11 @@ export abstract class AggregationQueryBuilder<R extends { id: RecordId }, T> ext
 
   /**
    * Validate field name to prevent injection attacks
-   * @private
    * @param field - Field name to validate
+   * @throws Error if field name is invalid
    */
   private validateFieldName(field: string): void {
-    if (typeof field !== 'string' || field.length === 0) {
-      throw new Error('Field name must be a non-empty string')
-    }
-
-    // Allow alphanumeric characters, underscores, dots, parentheses, asterisk for functions
-    const fieldNamePattern = /^[a-zA-Z0-9_.():*-]+$/
-    if (!fieldNamePattern.test(field)) {
-      throw new Error(
-        `Invalid field name: ${field}. Field names can only contain letters, numbers, dots, underscores, colons, hyphens, and parentheses`,
-      )
-    }
-
-    // Prevent common SQL injection patterns
-    const dangerousPatterns = [
-      /;/, // Statement terminator
-      /--/, // SQL comments
-      /\/\*/, // Block comments
-      /\*\//, // Block comments
-      /\bunion\b/i, // UNION attacks
-      /\bselect\b/i, // SELECT injections
-      /\binsert\b/i, // INSERT injections
-      /\bupdate\b/i, // UPDATE injections
-      /\bdelete\b/i, // DELETE injections
-      /\bdrop\b/i, // DROP injections
-    ]
-
-    for (const pattern of dangerousPatterns) {
-      if (pattern.test(field)) {
-        throw new Error(`Potentially dangerous field name detected: ${field}`)
-      }
-    }
+    const validationResult = validateFieldName(field)
+    if (!validationResult.success) throw new Error(validationResult.error)
   }
 }
