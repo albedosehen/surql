@@ -280,7 +280,6 @@ type SerializedObject<T> = {
   [K in keyof T]: SerializedValue<T[K]>
 }
 
-
 /**
  * Map a value to its serialized form:
  * - RecordId ➔ string
@@ -288,8 +287,7 @@ type SerializedObject<T> = {
  * - Object   ➔ recursively serialized
  * - Other    ➔ unchanged
  */
-type SerializedValue<T> =
-  T extends RecordId ? string
+type SerializedValue<T> = T extends RecordId ? string
   : T extends Date ? string
   : T extends (Date | null) ? string | null
   : T extends (Date | undefined) ? string | undefined
@@ -344,10 +342,9 @@ export type Serialized<T> = SerializedObject<T>
  */
 export const createSerializer = <R extends { id: RecordId }>(
   // deno-lint-ignore no-explicit-any
-  custom?: Record<string, (...args: any[]) => any>
+  custom?: Record<string, (...args: any[]) => any>,
 ) => {
   const base = {
-
     /**
      * Convert a RecordId to string representation
      *
@@ -463,11 +460,10 @@ export const createSerializer = <R extends { id: RecordId }>(
     ...(custom || {}),
     // deno-lint-ignore no-explicit-any
     extend(more: Record<string, (...args: any[]) => any>) {
-      return { ...base, ...more };
+      return { ...base, ...more }
     },
   }
-};
-
+}
 
 /**
  * Check if a value is a primitive type or null/undefined
