@@ -8,6 +8,7 @@
   - Introduced `createSerializer<T>()` utility for custom serialization logic.
   - Enhanced type safety with `Serialized<T>` type for serialized models.
   - Example usage in `examples/customMapping.ts` demonstrating custom mapping of user data.
+  - Added `Serializer<R>` type for SurrealDB to `createSerializer` utility, allowing custom serialization functions to be defined.
 
 ### Updated - Documentation
 
