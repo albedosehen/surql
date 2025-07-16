@@ -55,15 +55,27 @@ Don't know what SurrealDB is? [Learn more about the modern database here!](https
 
 - **[Changelog](./CHANGELOG.md)** - Detailed release notes and migration information
 
-## Installation
+Absolutely! Here’s a **clear, structured, and logically-flowing rewrite** for your SurrealDB SurQL installation and getting started docs.
+I've grouped **installation**, **authentication**, **usage**, and **smart defaults**—removing redundancy and making sure the examples and explanations are in context.
 
-Simply import from JSR in your file
+---
+
+## SurrealDB SurQL Client – Quick Start
+
+---
+
+### 1. Installation
+
+#### Install from JSR
+
+In your Deno project, import SurQL directly from JSR:
 
 ```typescript
 import { query, SurrealConnectionManager } from "jsr:@albedosehen/surql"
 ```
 
-Or update your imports and create an alias in `deno.json`
+**Optional:**
+Set up an alias in your `deno.json` for simpler imports:
 
 ```json
 {
@@ -73,255 +85,208 @@ Or update your imports and create an alias in `deno.json`
 }
 ```
 
+Then you can import:
+
 ```typescript
 import { query, SurrealConnectionManager } from "surql"
 ```
 
-## Getting Started
+---
 
-To get started, you'll need to first have your SurrealDB server running and reachable.
+### 2. Connecting to SurrealDB
 
-### Connecting to your SurrealDB server
+You need your SurrealDB server running and reachable.
 
-**Note:** Always use environment variables for sensitive information like credentials.
+#### Environment Variables
+
+Always store credentials (like usernames and passwords) in environment variables—**never** hardcode secrets in code.
+
+---
+
+### 3. Authentication
+
+SurQL supports multiple authentication types. Here are common examples:
+
+#### Root User Authentication
 
 ```typescript
-// Root user authentication
 const rootToken = await client.signin({
   type: 'root',
-  username: Deno.env.get('SURREALDB_ROOT_USERNAME') || 'root',
-  password: Deno.env.get('SURREALDB_ROOT_PASSWORD') || 'password'
-})
+  username: Deno.env.get('SURREALDB_ROOT_USERNAME') ?? 'root',
+  password: Deno.env.get('SURREALDB_ROOT_PASSWORD') ?? 'password'
+});
+```
 
-// Scope user authentication
+#### Namespace/Database/Scope User Authentication
+
+```typescript
 const userToken = await client.signin({
   type: 'scope',
-  namespace: Deno.env.get('SURREALDB_NAMESPACE') || 'dev',
-  database: Deno.env.get('SURREALDB_DATABASE') || 'myapp',
+  namespace: Deno.env.get('SURREALDB_NAMESPACE') ?? 'dev',
+  database: Deno.env.get('SURREALDB_DATABASE') ?? 'myapp',
   scope: 'user',
-  username: Deno.env.get('SURREALDB_USER_USERNAME') || 'username',
-  password: Deno.env.get('SURREALDB_USER_PASSWORD') || 'password'
-})
+  username: Deno.env.get('SURREALDB_USER_USERNAME') ?? 'username',
+  password: Deno.env.get('SURREALDB_USER_PASSWORD') ?? 'password'
+});
+```
 
-// Sign up new scope user
+#### Sign Up a New Scope User
+
+```typescript
 const newUserToken = await client.signup({
-  namespace: Deno.env.get('SURREALDB_NAMESPACE') || 'dev',
-  database: Deno.env.get('SURREALDB_DATABASE') || 'myapp',
+  namespace: Deno.env.get('SURREALDB_NAMESPACE') ?? 'dev',
+  database: Deno.env.get('SURREALDB_DATABASE') ?? 'myapp',
   scope: 'user',
   username: 'randomuser',
   password: 'randompassword',
   email: 'random@example.com',
   name: 'Random User'
-})
+});
+```
 
-// Check authentication status
+---
+
+#### Session Management
+
+```typescript
 if (client.isAuthenticated()) {
-  const sessionInfo = await client.info()
-  console.log('Logged in as:', sessionInfo.id)
-  console.log('Session expires:', sessionInfo.expires)
+  const sessionInfo = await client.info();
+  console.log('Logged in as:', sessionInfo.id);
+  console.log('Session expires:', sessionInfo.expires);
 }
 
 // Sign out
-await client.invalidate()
+await client.invalidate();
 ```
 
-### Basic Query Example
+---
 
-Making a query with SurQL is straightforward. You can use the `query()` method to fetch data from your SurrealDB instance.
+### 4. Basic Query Example
+
+Once authenticated, you can query your SurrealDB instance.
 
 ```typescript
-  const result = await client.query(conn, 'posts', { warnings: 'suppress' })
-    .where({ published: true })
-    .execute()
+const result = await client.query(conn, 'posts', { warnings: 'suppress' })
+  .where({ published: true })
+  .execute();
 ```
+
+#### Using Strong Typing & Mapping
 
 ```typescript
 import { SurQLClient, RecordId } from "surql"
 
-// Define your types
+// Define types for raw and serialized user data
 interface UserRaw {
-  id: RecordId
-  username: string
-  email: string
-  created_at: Date
-  active: boolean
+  id: RecordId;
+  username: string;
+  email: string;
+  created_at: Date;
+  active: boolean;
 }
 
-interface User {
-  id: string
-  username: string
-  email: string
-  createdAt: string
-  active: boolean
+interface SerializedUser {
+  id: string;
+  username: string;
+  email: string;
+  createdAt: string;
+  active: boolean;
 }
 
-// Create mapping function
-const mapUser = (raw: UserRaw): User => ({
+// Mapper to convert SurrealDB types to plain objects
+const mapUser = (raw: UserRaw): SerializedUser => ({
   id: raw.id.toString(),
   username: raw.username,
   email: raw.email,
   createdAt: raw.created_at.toISOString(),
   active: raw.active
-})
+});
 
-// Execute query with explicit transformation
+// Execute a query and map the results
 try {
-  const activeUsers = await client.query<UserRaw, User>('users')
+  const activeUsers = await client.query<UserRaw, SerializedUser>('users')
     .where({ active: true })
     .orderBy('username')
     .limit(10)
     .map(mapUser)
-    .execute()
+    .execute();
 
-  console.log('Found active users:', activeUsers)
+  console.log('Found active users:', activeUsers);
 } catch (error) {
-  console.error('Query failed:', error)
+  console.error('Query failed:', error);
 }
 ```
 
-### Smart Defaults Example
+---
+
+### 5. Smart Defaults Example
+
+You can automatically serialize raw SurrealDB records using SurQL utility types:
 
 ```typescript
 import { SurQLClient, Serialized, createSerializer } from "surql"
 
-// NEW: Simplified usage with T = R defaults
-// No explicit transformation - works directly with raw SurrealDB types
 try {
   const rawUsers = await client.query<UserRaw>('users')
     .where({ active: true })
     .orderBy('username')
     .limit(10)
-    .execute() // Returns UserRaw[] with RecordId and Date objects
+    .execute(); // Array of UserRaw
 
-  console.log('Raw users with SurrealDB types:', rawUsers)
+  console.log('Raw users with SurrealDB types:', rawUsers);
 
-  // Use utility types for automatic conversion
-  type User = Serialized<UserRaw> // { id: string; created_at: string; username: string; email: string; active: boolean }
+  // Use the Serialized utility type
+  type SerializedUser = Serialized<UserRaw>; // id: string; created_at: string; etc.
 
-  // Create helper functions when transformation is needed
-  const serializer = createSerializer<UserRaw>()
-  const transformedUsers: User[] = rawUsers.map(raw => ({
+  // Create serializer
+  const serializer = createSerializer<UserRaw>();
+  const transformedUsers: SerializedUser[] = rawUsers.map(raw => ({
     id: serializer.id(raw),
     username: raw.username,
     email: raw.email,
     created_at: serializer.date(raw.created_at),
     active: raw.active
-  }))
+  }));
 
-  console.log('Transformed users:', transformedUsers)
+  console.log('Transformed users:', transformedUsers);
 } catch (error) {
-  console.error('Query failed:', error)
+  console.error('Query failed:', error);
 }
 ```
 
-### Advanced CRUD Operations Examples
+---
 
-```typescript
-// Merge operations - partial updates
-const updatedUser = await client.merge('users', 'user:123', {
-  email: 'newemail@example.com',
-  lastLogin: new Date()
-})
-  .map(mapUser)
-  .execute()
-
-// JSON Patch operations (RFC 6902)
-const patchedUser = await client.patch('users', 'user:123', [
-  { op: 'replace', path: '/email', value: 'updated@example.com' },
-  { op: 'add', path: '/preferences/theme', value: 'dark' },
-  { op: 'remove', path: '/temporaryField' }
-])
-  .addOperation({ op: 'replace', path: '/lastUpdated', value: new Date().toISOString() })
-  .map(mapUser)
-  .execute()
-
-// Upsert operations - insert or update
-const savedUser = await client.upsert('users', {
-  username: 'admin',
-  email: 'admin@example.com',
-  role: 'administrator'
-})
-  .withId('user:admin') // Specify exact ID
-  .map(mapUser)
-  .execute()
-
-// Upsert with conflict detection
-const user = await client.upsert('users', {
-  username: 'unique_user',
-  email: 'user@example.com'
-})
-  .onConflict('username') // Check for conflicts on username
-  .map(mapUser)
-  .execute()
-```
-
-### Enhanced Query Builder Examples
-
-```typescript
-// GROUP BY and aggregations
-const salesByCategory = await client.query('orders')
-  .groupBy('category')
-  .count()
-  .sum('amount')
-  .avg('price')
-  .having('COUNT(*)', Op.GREATER_THAN, 10)
-  .orderBy('sum_amount', SortDirection.DESC)
-  .execute()
-
-// Complex aggregation query
-const customerInsights = await client.query('orders')
-  .groupBy('customer_id', 'product_category')
-  .count('order_id')
-  .sum('total_amount')
-  .avg('order_value')
-  .min('order_date')
-  .max('order_date')
-  .having('SUM(total_amount) > 1000')
-  .having('COUNT(*)', Op.GREATER_THAN, 5)
-  .page(1, 20) // Enhanced pagination
-  .execute()
-
-// Advanced filtering with aggregations
-const premiumCustomers = await client.query('customer_orders')
-  .groupBy('customer_id')
-  .count()
-  .sum('order_total')
-  .having('SUM(order_total)', Op.GREATER_THAN, 5000)
-  .having('COUNT(*)', Op.GREATER_THAN, 10)
-  .orderBy('sum_order_total', SortDirection.DESC)
-  .limit(50)
-  .execute()
-```
-
-## API Reference
-
-### Authentication Examples
+### 6. API Reference
 
 #### Authentication Methods
 
+Root User
+
 ```typescript
-// Sign in with different credential types
-await client.signin({
-  type: 'root',
-  username: 'root',
-  password: 'password'
-})
+await client.signin({ type: 'root', username: 'root', password: 'password' });
+```
 
-await client.signin({
-  type: 'namespace',
-  namespace: 'myapp',
-  username: 'admin',
-  password: 'password'
-})
+Namespace Admin
 
+```typescript
+await client.signin({ type: 'namespace', namespace: 'myapp', username: 'admin', password: 'password' });
+```
+
+Database User
+
+```typescript
 await client.signin({
   type: 'database',
   namespace: 'myapp',
   database: 'production',
   username: 'dbuser',
   password: 'password'
-})
+});
+```
 
+Scope User
+
+```typescript
 await client.signin({
   type: 'scope',
   namespace: 'myapp',
@@ -329,9 +294,12 @@ await client.signin({
   scope: 'user',
   username: 'john@example.com',
   password: 'userpassword'
-})
+});
+```
 
-// Sign up new scope user
+Sign Up Scope User
+
+```typescript
 await client.signup({
   namespace: 'myapp',
   database: 'production',
@@ -341,43 +309,224 @@ await client.signup({
   email: 'jane@example.com',
   name: 'Jane Doe',
   preferences: { theme: 'dark' }
-})
+});
+```
 
-// Authenticate with existing token
-await client.authenticate('eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...')
+Authenticate with an Existing Token
+
+```typescript
+await client.authenticate(token);
 
 // Session management
-const sessionInfo = await client.info()
-await client.invalidate()
-const isLoggedIn = client.isAuthenticated()
-const currentToken = client.getCurrentToken()
+const sessionInfo = await client.info();
+await client.invalidate();
+const isLoggedIn = client.isAuthenticated();
+const currentToken = client.getCurrentToken();
 ```
 
-#### Merge Operations
+---
+
+## SurQL Query Guide
+
+---
+
+### 1. Reading Data
+
+#### Simple Read Queries
 
 ```typescript
-// Partial updates that preserve existing fields
-const updatedUser = await client.merge('users', 'user:123', {
-  email: 'newemail@example.com',
-  lastLogin: new Date(),
-  preferences: { notifications: true }
-})
+// Get all users (raw SurrealDB types)
+const rawUsers = await client.query<UserRaw>('users').execute();
+
+// Get all users with transformation
+const users = await client.query<UserRaw, User>('users').map(mapUser).execute();
+
+// Get first user (raw)
+const firstRawUser = await client.query<UserRaw>('users').first();
+
+// Get first user (transformed)
+const firstUser = await client.query<UserRaw, User>('users').map(mapUser).first();
+```
+
+---
+
+### 2. Filtering Data
+
+#### Object-style WHERE
+
+```typescript
+const rawUsers = await client.query<UserRaw>('users')
+  .where({ active: true, role: 'admin', 'profile.verified': true })
+  .execute();
+
+const users = await client.query<UserRaw, User>('users')
+  .where({ active: true, role: 'admin', 'profile.verified': true })
   .map(mapUser)
-  .execute()
-
-// Merge with nested object updates
-const updatedProduct = await client.merge('products', 'product:456', {
-  'pricing.discount': 0.15,
-  'metadata.updated_by': 'admin',
-  'tags': ['sale', 'featured']
-})
-  .execute()
+  .execute();
 ```
 
-#### JSON Patch Operations (RFC 6902)
+#### Fluent-style WHERE
 
 ```typescript
-// Standard JSON Patch operations
+const rawFilteredUsers = await client.query<UserRaw>('users')
+  .where('age', Op.GREATER_THAN, 18)
+  .where('username', Op.LIKE, '%admin%')
+  .execute();
+
+const users = await client.query<UserRaw, User>('users')
+  .where('age', Op.GREATER_THAN, 18)
+  .where('username', Op.LIKE, '%admin%')
+  .map(mapUser)
+  .execute();
+```
+
+#### Convenience WHERE Methods
+
+```typescript
+const verifiedUsers = await client.query<UserRaw>('users')
+  .whereEquals('status', 'verified')
+  .whereContains('tags', 'premium')
+  .whereLike('email', '%@company.com')
+  .execute();
+```
+
+---
+
+### 3. Sorting and Pagination
+
+#### Sorting
+
+```typescript
+const rawUsers = await query<UserRaw>(connectionProvider, userTable)
+  .orderBy('created_at', SortDirection.DESC)
+  .orderBy('username', SortDirection.ASC)
+  .execute();
+
+const users = await query<UserRaw, User>(connectionProvider, userTable)
+  .orderBy('created_at', SortDirection.DESC)
+  .orderBy('username', SortDirection.ASC)
+  .map(mapUser)
+  .execute();
+```
+
+#### Pagination
+
+```typescript
+const rawPagedUsers = await query<UserRaw>(connectionProvider, userTable)
+  .limit(25)
+  .offset(50)
+  .execute();
+
+const users = await query<UserRaw, User>(connectionProvider, userTable)
+  .limit(25)
+  .offset(50)
+  .map(mapUser)
+  .execute();
+```
+
+#### Field Selection
+
+```typescript
+const partialUsers = await query<UserRaw>(connectionProvider, userTable)
+  .select('username', 'email', 'created_at')
+  .execute();
+```
+
+---
+
+### 4. Creating Data
+
+```typescript
+// Raw types
+const newRawUser = await create<UserRaw>(connectionProvider, userTable, {
+  username: 'johndoe',
+  email: 'john@example.com',
+  active: true,
+  profile: { firstName: 'John', lastName: 'Doe' }
+}).execute();
+
+console.log('Created raw user:', newRawUser);
+
+// With transformation
+const newUser = await create<UserRaw, User>(connectionProvider, userTable, {
+  username: 'johndoe',
+  email: 'john@example.com',
+  active: true,
+  profile: { firstName: 'John', lastName: 'Doe' }
+}).map(mapUser).execute();
+
+console.log('Created transformed user:', newUser);
+```
+
+---
+
+### 5. Updating Data
+
+#### Merge Update
+
+```typescript
+const updatedRawUser = await update<UserRaw>(
+  connectionProvider, userTable, 'users:123', {
+    active: false, lastLogin: new Date()
+  }
+).execute();
+
+const updatedUser = await update<UserRaw, User>(
+  connectionProvider, userTable, 'users:123', {
+    active: false, lastLogin: new Date()
+  }
+).map(mapUser).execute();
+```
+
+#### Replace Entire Record
+
+```typescript
+const replacedRawUser = await update<UserRaw>(
+  connectionProvider, userTable, 'users:123', {
+    username: 'newusername', email: 'new@example.com', active: true
+  }
+).replace().execute();
+
+const replacedUser = await update<UserRaw, User>(
+  connectionProvider, userTable, 'users:123', {
+    username: 'newusername', email: 'new@example.com', active: true
+  }
+).replace().map(mapUser).execute();
+```
+
+---
+
+### 6. Deleting Data
+
+```typescript
+const deletedRawUser = await remove<UserRaw>(connectionProvider, userTable, 'users:123').execute();
+console.log('Deleted raw user:', deletedRawUser);
+
+const deletedUser = await remove<UserRaw, User>(connectionProvider, userTable, 'users:123')
+  .map(mapUser)
+  .execute();
+console.log('Deleted transformed user:', deletedUser);
+```
+
+---
+
+### 7. Partial/Merge & Patch Operations
+
+#### Merge (Partial Update)
+
+```typescript
+const updatedUser = await client.merge('users', 'user:123', {
+  email: 'newemail@example.com', lastLogin: new Date(), preferences: { notifications: true }
+}).map(mapUser).execute();
+
+const updatedProduct = await client.merge('products', 'product:456', {
+  'pricing.discount': 0.15, 'metadata.updated_by': 'admin', tags: ['sale', 'featured']
+}).execute();
+```
+
+#### JSON Patch (RFC 6902)
+
+```typescript
 const patchedRecord = await client.patch('users', 'user:123', [
   { op: 'add', path: '/preferences/theme', value: 'dark' },
   { op: 'replace', path: '/email', value: 'updated@example.com' },
@@ -385,11 +534,8 @@ const patchedRecord = await client.patch('users', 'user:123', [
   { op: 'move', from: '/oldField', path: '/newField' },
   { op: 'copy', from: '/template', path: '/newCopy' },
   { op: 'test', path: '/version', value: '1.0' }
-])
-  .map(mapUser)
-  .execute()
+]).map(mapUser).execute();
 
-// Fluent patch building
 const result = await client.patch('documents', 'doc:789', [])
   .addOperation({ op: 'add', path: '/sections/-', value: newSection })
   .addOperation({ op: 'replace', path: '/lastModified', value: new Date() })
@@ -397,93 +543,59 @@ const result = await client.patch('documents', 'doc:789', [])
     { op: 'remove', path: '/draft' },
     { op: 'add', path: '/published', value: true }
   ])
-  .execute()
+  .execute();
 ```
 
-#### Upsert Operations
+---
+
+### 8. Grouping, Aggregations, and HAVING
+
+#### GROUP BY & Aggregations
 
 ```typescript
-// Upsert with specific ID
-const savedUser = await client.upsert('users', {
-  username: 'admin',
-  email: 'admin@example.com',
-  role: 'administrator'
-})
-  .withId('user:admin')
-  .map(mapUser)
-  .execute()
-
-// Upsert with conflict detection
-const user = await client.upsert('users', {
-  username: 'unique_user',
-  email: 'user@example.com',
-  profile: { bio: 'Software developer' }
-})
-  .onConflict('username', 'email')
-  .map(mapUser)
-  .execute()
-
-// Simple upsert (creates new record)
-const newRecord = await client.upsert('logs', {
-  level: 'info',
-  message: 'Application started',
-  timestamp: new Date()
-})
-  .execute()
-```
-
-#### GROUP BY and Aggregations
-
-```typescript
-// Basic grouping with aggregations
 const salesByRegion = await client.query('sales')
   .groupBy('region')
   .count()
   .sum('amount')
   .avg('order_value')
-  .execute()
+  .execute();
 
-// Multiple grouping fields
 const detailedAnalytics = await client.query('orders')
   .groupBy('customer_id', 'product_category', 'sales_channel')
   .count('order_id')
   .sum('total_amount')
   .min('order_date')
   .max('order_date')
-  .execute()
+  .execute();
 
-// Custom aggregation aliases
 const customAggregation = await client.query('products')
   .groupBy('category')
-  .count() // Creates 'count' field
-  .sum('price') // Creates 'sum_price' field
-  .avg('rating') // Creates 'avg_rating' field
-  .min('stock') // Creates 'min_stock' field
-  .max('stock') // Creates 'max_stock' field
-  .execute()
+  .count()
+  .sum('price')
+  .avg('rating')
+  .min('stock')
+  .max('stock')
+  .execute();
 ```
 
 #### HAVING Conditions
 
 ```typescript
-// HAVING with aggregation functions
 const highValueCustomers = await client.query('customer_orders')
   .groupBy('customer_id')
   .sum('order_total')
   .count()
   .having('SUM(order_total)', Op.GREATER_THAN, 10000)
   .having('COUNT(*)', Op.GREATER_THAN, 5)
-  .execute()
+  .execute();
 
-// Direct HAVING conditions
 const activeCategories = await client.query('products')
   .groupBy('category')
   .count()
   .having('COUNT(*) > 10')
   .having('AVG(price) BETWEEN 50 AND 500')
-  .execute()
+  .execute();
 
-// Complex HAVING with multiple conditions
 const premiumSegments = await client.query('sales')
   .groupBy('product_line', 'quarter')
   .sum('revenue')
@@ -492,10 +604,12 @@ const premiumSegments = await client.query('sales')
   .having('SUM(revenue)', Op.GREATER_THAN, 100000)
   .having('AVG(margin)', Op.GREATER_THAN, 0.25)
   .having('COUNT(transactions)', Op.GREATER_THAN, 50)
-  .execute()
+  .execute();
 ```
 
-#### Enhanced Pagination
+---
+
+### 9. Pagination (Advanced)
 
 ```typescript
 // Traditional limit/offset
@@ -504,16 +618,16 @@ const paginatedResults = await client.query('users')
   .orderBy('created_at', SortDirection.DESC)
   .limit(25)
   .offset(50)
-  .execute()
+  .execute();
 
-// Using offset-based pagination
+// Offset-based pagination with page number and size
 const pageResults = await client.query('products')
   .where({ in_stock: true })
   .orderBy('name')
   .page(3, 20) // Page 3, 20 items per page
-  .execute()
+  .execute();
 
-// Complex example
+// Complex grouped/paginated example
 const groupedPage = await client.query('analytics')
   .groupBy('date', 'channel')
   .sum('visits')
@@ -521,251 +635,31 @@ const groupedPage = await client.query('analytics')
   .having('SUM(visits)', Op.GREATER_THAN, 100)
   .orderBy('sum_visits', SortDirection.DESC)
   .page(1, 10)
-  .execute()
+  .execute();
 ```
 
-### Reading Data
+---
 
-You probably want to read data from your SurrealDB instance. SurQL provides a fluent interface for building queries and executing them.
-Here are some simple examples to get you started.
+#### **Tips**
 
-#### Simple Read Queries
+- Add `.map(mapUser)` to any query to transform from raw SurrealDB types to your domain models.
+- Use `execute()`, `first()`, etc., depending on your return type.
+- Most patterns support both **raw** and **transformed** types.
 
-```typescript
-// Get all users with raw SurrealDB types (T = R default)
-const rawUsers = await client.query<UserRaw>('users')
-  .execute() // Returns UserRaw[] with RecordId and Date objects
+---
 
-// Get all users with explicit transformation
-const users = await client.query<UserRaw, User>('users')
-  .map(mapUser)
-  .execute()
-
-// Get first user with raw types
-const firstRawUser = await client.query<UserRaw>('users')
-  .first() // Returns UserRaw | undefined
-
-// Get first user with transformation
-const firstUser = await client.query<UserRaw, User>('users')
-  .map(mapUser)
-  .first()
-```
-
-### Filtering Data
-
-```typescript
-// Object-style WHERE conditions with raw types
-const rawUsers = await client.query<UserRaw>('users')
-  .where({
-    active: true,
-    role: 'admin',
-    'profile.verified': true
-  })
-  .execute() // Returns UserRaw[] with SurrealDB types
-
-// Object-style WHERE conditions with transformation
-const users = await client.query<UserRaw, User>('users')
-  .where({
-    active: true,
-    role: 'admin',
-    'profile.verified': true
-  })
-  .map(mapUser)
-  .execute()
-
-// Fluent-style WHERE conditions with raw types
-const rawFilteredUsers = await client.query<UserRaw>('users')
-  .where('age', Op.GREATER_THAN, 18)
-  .where('username', Op.LIKE, '%admin%')
-  .execute()
-
-// Fluent-style WHERE conditions with transformation
-const users = await client.query<UserRaw, User>('users')
-  .where('age', Op.GREATER_THAN, 18)
-  .where('username', Op.LIKE, '%admin%')
-  .map(mapUser)
-  .execute()
-
-// Convenience methods work with both patterns
-const verifiedUsers = await client.query<UserRaw>('users')
-  .whereEquals('status', 'verified')
-  .whereContains('tags', 'premium')
-  .whereLike('email', '%@company.com')
-  .execute() // Or add .map(mapUser) for transformation
-```
-
-#### Sorting and Pagination
-
-```typescript
-// Sorting with raw types
-const rawUsers = await query<UserRaw>(connectionProvider, userTable)
-  .orderBy('created_at', SortDirection.DESC)
-  .orderBy('username', SortDirection.ASC)
-  .execute() // Returns sorted UserRaw[] with Date objects
-
-// Sorting with transformation
-const users = await query<UserRaw, User>(connectionProvider, userTable)
-  .orderBy('created_at', SortDirection.DESC)
-  .orderBy('username', SortDirection.ASC)
-  .map(mapUser)
-  .execute()
-
-// Pagination with raw types
-const rawPagedUsers = await query<UserRaw>(connectionProvider, userTable)
-  .limit(25)
-  .offset(50)
-  .execute()
-
-// Pagination with transformation
-const users = await query<UserRaw, User>(connectionProvider, userTable)
-  .limit(25)
-  .offset(50)
-  .map(mapUser)
-  .execute()
-
-// Field selection works with both patterns
-const partialUsers = await query<UserRaw>(connectionProvider, userTable)
-  .select('username', 'email', 'created_at')
-  .execute() // Or add .map(mapUser) for transformation
-```
-
-### Creating Data
-
-```typescript
-// Create new user with raw types (T = R default)
-const newRawUser = await create<UserRaw>(connectionProvider, userTable, {
-  username: 'johndoe',
-  email: 'john@example.com',
-  active: true,
-  profile: {
-    firstName: 'John',
-    lastName: 'Doe'
-  }
-})
-  .execute() // Returns UserRaw with RecordId and Date objects
-
-console.log('Created raw user:', newRawUser)
-
-// Create new user with transformation
-const newUser = await create<UserRaw, User>(connectionProvider, userTable, {
-  username: 'johndoe',
-  email: 'john@example.com',
-  active: true,
-  profile: {
-    firstName: 'John',
-    lastName: 'Doe'
-  }
-})
-  .map(mapUser)
-  .execute()
-
-console.log('Created transformed user:', newUser)
-```
-
-### Updating Data
-
-```typescript
-// Update with merge using raw types (T = R default)
-const updatedRawUser = await update<UserRaw>(
-  connectionProvider,
-  userTable,
-  'users:123',
-  {
-    active: false,
-    lastLogin: new Date()
-  }
-)
-  .execute() // Returns UserRaw with RecordId and Date objects
-
-// Update with merge and transformation
-const updatedUser = await update<UserRaw, User>(
-  connectionProvider,
-  userTable,
-  'users:123',
-  {
-    active: false,
-    lastLogin: new Date()
-  }
-)
-  .map(mapUser)
-  .execute()
-
-// Replace entire record with raw types
-const replacedRawUser = await update<UserRaw>(
-  connectionProvider,
-  userTable,
-  'users:123',
-  {
-    username: 'newusername',
-    email: 'new@example.com',
-    active: true
-  }
-)
-  .replace() // Switch to replace mode
-  .execute()
-
-// Replace entire record with transformation
-const replacedUser = await update<UserRaw, User>(
-  connectionProvider,
-  userTable,
-  'users:123',
-  {
-    username: 'newusername',
-    email: 'new@example.com',
-    active: true
-  }
-)
-  .replace() // Switch to replace mode
-  .map(mapUser)
-  .execute()
-```
-
-### Deleting Data
-
-```typescript
-// Delete by ID with raw types (T = R default)
-const deletedRawUser = await remove<UserRaw>(connectionProvider, userTable, 'users:123')
-  .execute() // Returns UserRaw with RecordId and Date objects
-
-console.log('Deleted raw user:', deletedRawUser)
-
-// Delete by ID with transformation
-const deletedUser = await remove<UserRaw, User>(connectionProvider, userTable, 'users:123')
-  .map(mapUser)
-  .execute()
-
-console.log('Deleted transformed user:', deletedUser)
-```
-
-## 🔩 Utility Types & Helpers
+### 🔩 Utility Types & Helpers
 
 SurQL provides powerful utility types and helper functions to enhance DX while maintaining type safety.
 
-### Smart Defaults (T = R)
-
-All query functions default to `T = R`, allowing you to omit the transformation type parameter when no mapping is needed:
-
-```typescript
-// Directly using a raw SurrealDB types
-const users = await query<UserRaw>(connectionProvider, userTable)
-  .where({ active: true })
-  .execute() // Returns UserRaw[] with RecordId and Date objects
-
-// Explicit transformation
-const transformedUsers = await query<UserRaw, User>(connectionProvider, userTable)
-  .where({ active: true })
-  .map(mapUser)
-  .execute() // Returns User[] with transformed types
-```
-
-### Serializer Helpers
+#### Serializer Helpers
 
  Serialized `<T>` Utility Type Automatically converts SurrealDB types to their serialized equivalents. Useful for consistent data mapping in an application.
  The benefit of this is that it simplifies the process of working with complex data structures by providing a clear and consistent way to transform data between different formats.
 
 The `createSerializer` Provides a simple set of transformation utilities to handle common complex data structures, edge cases, and provide reusable conversion logic. Refer to `examples/complexMapping.ts` for examples.
 
-### Optional Mapping with Warnings
+#### Optional Mapping with Warnings
 
 Functions provide helpful warnings when no mapper is provided but still return results. You can suppress these warnings as desired.
 
@@ -783,12 +677,12 @@ const rawUsers = await query<UserRaw>(connectionProvider, userTable, { warnings:
   .execute() // Suppress warning with explicit raw data usage
 ```
 
-## 👾 Error Handling
+### 👾 Error Handling
 
 SurQL uses standard JavaScript Promise patterns with enhanced error types for easier troubleshooting and debugging.
 The below examples are snippets of *some* error types and error handling patterns. These are optional and are provided for convenience.
 
-### Authentication Errors
+#### Authentication Errors
 
 Examples with error types to handle authentication issues:
 
@@ -815,7 +709,7 @@ try {
 }
 ```
 
-### Session Management Errors
+#### Session Management Errors
 
 Examples with error types to handle session management issues:
 
@@ -835,7 +729,7 @@ try {
 }
 ```
 
-### Query & Operation Errors
+#### Query & Operation Errors
 
 Examples with errors types to handle various query / CRUD operation issues:
 
@@ -868,7 +762,7 @@ try {
 }
 ```
 
-#### Try-Catch Pattern
+##### Try-Catch Pattern
 
 SurQL supports both async/await and Promise chain patterns for error handling following standard JavaScript practices.
 There is no special syntax for error handling when using SurQL, so standard JavaScript error handling patterns apply.
@@ -890,7 +784,7 @@ try {
 }
 ```
 
-#### Promise Chain Pattern
+##### Promise Chain Pattern
 
 ```typescript
 client.query<UserRaw, User>('users')
@@ -907,7 +801,11 @@ client.query<UserRaw, User>('users')
   })
 ```
 
-## Connection Management
+---
+
+### Connection Management
+
+---
 
 SurQL provides a `SurQLClient` and `SurrealConnectionManager` classes for managing authentication & connections to the database.
 Both work similarly, but the class you choose depends upon your needs.
@@ -915,7 +813,7 @@ Both work similarly, but the class you choose depends upon your needs.
 - If you require multiple concurrent operations/connections -> `SurrealConnectionManager`
 - If you need a simpler interface for a single connection -> `SurQLClient`
 
-### SurQLClient
+#### SurQLClient
 
 SurQL also provides a `SurQLClient` that wraps the connection manager and provides a more convenient interface for authentication and session management for lighter use cases.
 Useful for accessing all of SurQL's features from a single client instance or when first working with the query builder.
@@ -933,7 +831,7 @@ const users = await client.query<UserRaw, User>('users')
 console.log('Success:', users)
 ```
 
-### SurrealConnectionManager
+#### SurrealConnectionManager
 
 SurQL provides a `SurrealConnectionManager` to handle connection pooling and management automatically. This allows you to reuse connections across multiple operations without worrying about connection lifecycle.
 This also means that you can perform multiple queries concurrently without creating new connections each time, or having to pass around a connection instance.
@@ -955,78 +853,11 @@ const posts = await query<PostRaw, Post>(connectionProvider, postTable)
 await connectionProvider.close()
 ```
 
-### Complex Queries
+---
 
-```typescript
-// Chaining multiple operations with raw types
-const rawResult = await query<UserRaw>(connectionProvider, userTable)
-  .where({ active: true })
-  .where('created_at', Op.GREATER_THAN, new Date('2024-01-01'))
-  .whereContains('tags', 'premium')
-  .orderBy('created_at', SortDirection.DESC)
-  .orderBy('username', SortDirection.ASC)
-  .limit(50)
-  .offset(0)
-  .select('username', 'email', 'created_at')
-  .execute() // Returns UserRaw[] with SurrealDB types
+### Examples
 
-console.log('Complex query raw result:', rawResult)
-
-// Chaining multiple operations with transformation
-const result = await query<UserRaw, User>(connectionProvider, userTable)
-  .where({ active: true })
-  .where('created_at', Op.GREATER_THAN, new Date('2024-01-01'))
-  .whereContains('tags', 'premium')
-  .orderBy('created_at', SortDirection.DESC)
-  .orderBy('username', SortDirection.ASC)
-  .limit(50)
-  .offset(0)
-  .select('username', 'email', 'created_at')
-  .map(mapUser)
-  .execute()
-
-console.log('Complex query transformed result:', result)
-```
-
-### Custom Mapping
-
-```typescript
-// Using utility types and helper functions
-import { Serialized, createSerializer } from "surql"
-
-type User = Serialized<UserRaw> // Automatic type conversion
-const serializer = createSerializer<UserRaw>()
-
-// Complex mapping with computed fields using helpers
-const mapUserWithAge = (raw: UserRaw): User & { age: number } => ({
-  id: serializer.id(raw),        // RecordId → string
-  username: raw.username,
-  email: raw.email,
-  createdAt: serializer.date(raw.created_at), // Date → ISO string
-  active: raw.active,
-  age: new Date().getFullYear() - raw.birth_year
-})
-
-const usersWithAge = await query<UserRaw, User & { age: number }>(connectionProvider, userTable)
-  .map(mapUserWithAge)
-  .execute()
-
-// Complex mapping with manual conversion (still works)
-const mapUserWithAgeManual = (raw: UserRaw): User & { age: number } => ({
-  id: raw.id.toString(),
-  username: raw.username,
-  email: raw.email,
-  createdAt: raw.created_at.toISOString(),
-  active: raw.active,
-  age: new Date().getFullYear() - raw.birth_year
-})
-
-const usersWithAgeManual = await query<UserRaw, User & { age: number }>(connectionProvider, userTable)
-  .map(mapUserWithAgeManual)
-  .execute()
-```
-
-## Examples
+---
 
 Examples are available in the `examples/` directory. They assume you have a SurrealDB instance and the necessary database/schema set up.
 
@@ -1035,7 +866,11 @@ Examples are available in the `examples/` directory. They assume you have a Surr
 deno run -A examples/basicCrud.ts
 ```
 
+---
+
 ## 🤓 Contributing
+
+---
 
 Want to contribute? Please see my ***non-existing*** [Contributing Guidelines](./CONTRIBUTING.md) for details. For now, just open an issue or PR with your ideas!
 
@@ -1051,6 +886,8 @@ git clone https://github.com/albedosehen/surql.git
 cd surql
 ```
 
+### Tasks & Testing
+
 You should run these yourself before pushing to the repository. GitHub actions will also run these tasks automatically to check the code.
 
 - `deno check` to check for type errors
@@ -1058,11 +895,15 @@ You should run these yourself before pushing to the repository. GitHub actions w
 - `deno fmt` to format the code
 - `deno task test` to run the tests
 
+---
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## ❤️ Acknowledgments
+---
+
+### ❤️ Acknowledgments
 
 - Built for the [SurrealDB](https://surrealdb.com/) ecosystem
 - Designed for [Deno](https://deno.land/), *the superior JavaScript runtime* 🦖

@@ -1,6 +1,10 @@
 # Changelog
 
-## [0.2.4] - 2025-07-16
+## [0.2.5] - 2025-07-15
+
+- **Updated**: Minor updates to documentation.
+
+## [0.2.4] - 2025-07-15
 
 ### Added - New Features in v0.2.4
 
