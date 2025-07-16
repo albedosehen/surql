@@ -318,6 +318,35 @@ type SerializedValue<T> = T extends RecordId ? string
 export type Serialized<T> = SerializedObject<T>
 
 /**
+ * Serializer type for SurrealDB records
+ * Provides methods to convert RecordId and Date fields to their string representations
+ * and allows for custom serialization logic
+ *
+ * @template R - Raw record type with RecordId and Date objects
+ * @returns Serializer object with methods for common transformations
+ */
+export type Serializer<R extends { id: RecordId }> = {
+  id: (record: R) => string
+  date: (date: Date) => string
+  recordId: (recordId: RecordId) => string
+  optionalDate: (date?: Date) => string | undefined
+  optionalRecordId: (recordId?: RecordId) => string | undefined
+  optionalNumber: (n?: number) => number | undefined
+  dateOrNull: (date: Date | null) => string | null
+  recordIdArray: (recordIds: RecordId[]) => string[]
+  dateArray: (dates: Date[]) => string[]
+  number: (n: number) => number
+  numberOrNull: (n: number | null) => number | null
+  // deno-lint-ignore no-explicit-any
+  objectArray: <T>(arr: T[], serializer: (obj: T) => any) => any[]
+  // deno-lint-ignore no-explicit-any
+  optionalObject: <T>(obj: T | undefined, serializer: (obj: T) => any) => any | undefined
+  // deno-lint-ignore no-explicit-any
+  extend: (more: Record<string, (...args: any[]) => any>) => Serializer<R> & typeof more
+  // deno-lint-ignore no-explicit-any
+} & Record<string, (...args: any[]) => any>
+
+/**
  * Creates a collection of common serialization functions for transforming
  * raw database types to serializable types
  *
@@ -343,7 +372,7 @@ export type Serialized<T> = SerializedObject<T>
 export const createSerializer = <R extends { id: RecordId }>(
   // deno-lint-ignore no-explicit-any
   custom?: Record<string, (...args: any[]) => any>,
-) => {
+): Serializer<R> => {
   const base = {
     /**
      * Convert a RecordId to string representation
@@ -453,15 +482,21 @@ export const createSerializer = <R extends { id: RecordId }>(
     // deno-lint-ignore no-explicit-any
     optionalObject: <T>(obj: T | undefined, serializer: (obj: T) => any): any | undefined =>
       obj ? serializer(obj) : undefined,
+
+    /**
+     * Extend the serializer with additional custom serialization logic
+     * @param obj - Object containing additional serialization methods
+     * @returns Extended serializer object
+     */
+    // deno-lint-ignore no-explicit-any
+    extend(obj: Record<string, (...args: any[]) => any>) {
+      return { ...base, ...obj }
+    },
   }
 
   return {
     ...base,
     ...(custom || {}),
-    // deno-lint-ignore no-explicit-any
-    extend(more: Record<string, (...args: any[]) => any>) {
-      return { ...base, ...more }
-    },
   }
 }
 
