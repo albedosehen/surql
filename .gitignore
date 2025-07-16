@@ -1,13 +1,16 @@
 *
 
+!.github/
+!.github/**
+
+!examples/
+!examples/**
+
 !src/
 !src/**
 
 !test/
 !test/**
-
-!.github/
-!.github/**
 
 !.gitignore
 !CHANGELOG.md

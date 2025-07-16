@@ -274,53 +274,50 @@ function getHashAlgorithm(algorithm: string): string {
 }
 
 /**
- * Utility type that automatically converts RecordId and Date fields to strings
- *
- * This type recursively transforms:
- * - RecordId → string
- * - Date → string
- * - nested objects → SerializedObject<nested objects>
- * - other types → unchanged
- *
- * @template T - The type to serialize, must have an id field of type RecordId
- * @example
- * ```typescript
- * interface UserRaw {
- *   id: RecordId
- *   name: string
- *   createdAt: Date
- *   profile: {
- *     lastLogin: Date
- *   }
- * }
- *
- * type UserSerialized = Serialized<UserRaw>
- * // Result: {
- * //   id: string
- * //   name: string
- * //   createdAt: string
- * //   profile: {
- * //     lastLogin: string
- * //   }
- * // }
- * ```
- */
-export type Serialized<T extends { id: RecordId }> = {
-  [K in keyof T]: T[K] extends RecordId ? string
-    : T[K] extends Date ? string
-    : T[K] extends object ? SerializedObject<T[K]>
-    : T[K]
-}
-
-/**
  * Helper type for serializing nested objects without requiring id field
  */
 type SerializedObject<T> = {
-  [K in keyof T]: T[K] extends RecordId ? string
-    : T[K] extends Date ? string
-    : T[K] extends object ? SerializedObject<T[K]>
-    : T[K]
+  [K in keyof T]: SerializedValue<T[K]>
 }
+
+
+/**
+ * Map a value to its serialized form:
+ * - RecordId ➔ string
+ * - Date     ➔ string
+ * - Object   ➔ recursively serialized
+ * - Other    ➔ unchanged
+ */
+type SerializedValue<T> =
+  T extends RecordId ? string
+  : T extends Date ? string
+  : T extends (Date | null) ? string | null
+  : T extends (Date | undefined) ? string | undefined
+  : T extends (Date | null | undefined) ? string | null | undefined
+  : T extends object ? SerializedObject<T>
+  : T
+
+/**
+ * Serializes all properties of a type T for JSON or API transmission:
+ * - For each property, applies SerializedValue to map RecordId and Date to string, and objects recursively
+ * - Preserves optional properties (e.g., Date | undefined becomes string | undefined)
+ * - Ensures the shape of T is maintained, but with all fields in their serialized (JSON-safe) form
+ *
+ * Example:
+ *   // Given:
+ *   interface CommentRaw {
+ *     id: RecordId
+ *     createdAt: Date
+ *     editedAt?: Date
+ *   }
+ *   // Then:
+ *   Serialized<CommentRaw> == {
+ *     id: string
+ *     createdAt: string
+ *     editedAt?: string
+ *   }
+ */
+export type Serialized<T> = SerializedObject<T>
 
 /**
  * Creates a collection of common serialization functions for transforming
@@ -345,63 +342,132 @@ type SerializedObject<T> = {
  * })
  * ```
  */
-export const createSerializer = <R extends { id: RecordId }>() => ({
-  /**
-   * Convert a RecordId to string representation
-   *
-   * @param record - Record containing RecordId
-   * @returns String representation of the RecordId
-   */
-  id: (record: R): string => record.id.toString(),
+export const createSerializer = <R extends { id: RecordId }>(
+  // deno-lint-ignore no-explicit-any
+  custom?: Record<string, (...args: any[]) => any>
+) => {
+  const base = {
 
-  /**
-   * Convert a Date object to ISO string representation
-   *
-   * @param date - Date object to convert
-   * @returns ISO string representation of the date
-   */
-  date: (date: Date): string => date.toISOString(),
+    /**
+     * Convert a RecordId to string representation
+     *
+     * @param record - Record containing RecordId
+     * @returns String representation of the RecordId
+     */
+    id: (record: R): string => record.id.toString(),
 
-  /**
-   * Convert a RecordId field directly to string
-   *
-   * @param recordId - RecordId to convert
-   * @returns String representation of the RecordId
-   */
-  recordId: (recordId: RecordId): string => recordId.toString(),
+    /**
+     * Convert a Date object to ISO string representation
+     *
+     * @param date - Date object to convert
+     * @returns ISO string representation of the date
+     */
+    date: (date: Date): string => date.toISOString(),
 
-  /**
-   * Convert an optional Date to ISO string or undefined
-   *
-   * @param date - Optional Date object to convert
-   * @returns ISO string representation or undefined
-   */
-  optionalDate: (date?: Date): string | undefined => date?.toISOString(),
+    /**
+     * Convert a RecordId field directly to string
+     *
+     * @param recordId - RecordId to convert
+     * @returns String representation of the RecordId
+     */
+    recordId: (recordId: RecordId): string => recordId.toString(),
 
-  /**
-   * Convert an optional RecordId to string or undefined
-   *
-   * @param recordId - Optional RecordId to convert
-   * @returns String representation or undefined
-   */
-  optionalRecordId: (recordId?: RecordId): string | undefined => recordId?.toString(),
+    /**
+     * Convert an optional Date to ISO string or undefined
+     *
+     * @param date - Optional Date object to convert
+     * @returns ISO string representation or undefined
+     */
+    optionalDate: (date?: Date): string | undefined => date?.toISOString(),
 
-  /**
-   * Convert an array of RecordIds to strings
-   *
-   * @param recordIds - Array of RecordIds to convert
-   * @returns Array of string representations
-   */
-  recordIdArray: (recordIds: RecordId[]): string[] => recordIds.map((id) => id.toString()),
+    /**
+     * Convert an optional RecordId to string or undefined
+     *
+     * @param recordId - Optional RecordId to convert
+     * @returns String representation or undefined
+     */
+    optionalRecordId: (recordId?: RecordId): string | undefined => recordId?.toString(),
 
-  /**
-   * Convert an array of Dates to ISO strings
-   *
-   * @param dates - Array of Dates to convert
-   * @returns Array of ISO string representations
-   */
-  dateArray: (dates: Date[]): string[] => dates.map((date) => date.toISOString()),
-})
+    /**
+     * Convert an optional number to number or undefined
+     *
+     * @param n - Optional number to convert
+     * @returns Number or undefined
+     */
+    optionalNumber: (n?: number): number | undefined => n,
+
+    /**
+     * Convert a Date or null to ISO string or null
+     *
+     * @param date - Date or null to convert
+     * @returns ISO string representation or null
+     */
+    dateOrNull: (date: Date | null): string | null => (date ? date.toISOString() : null),
+
+    /**
+     * Convert an array of RecordIds to strings
+     *
+     * @param recordIds - Array of RecordIds to convert
+     * @returns Array of string representations
+     */
+    recordIdArray: (recordIds: RecordId[]): string[] => recordIds.map((id) => id.toString()),
+
+    /**
+     * Convert an array of Dates to ISO strings
+     *
+     * @param dates - Array of Dates to convert
+     * @returns Array of ISO string representations
+     */
+    dateArray: (dates: Date[]): string[] => dates.map((date) => date.toISOString()),
+
+    /**
+     * Pass through a number
+     *
+     * @param n - Number value
+     * @returns The same number
+     */
+    number: (n: number): number => n,
+
+    /**
+     * Pass through a number or null (type consistency)
+     *
+     * @param n - Number value or null
+     * @returns The same number or null
+     */
+    numberOrNull: (n: number | null): number | null => n,
+
+    /**
+     * Serialize an array of objects using a provided serializer function
+     *
+     * @param arr - Array of objects
+     * @param serializer - Function to serialize each object
+     * @returns Array of serialized objects
+     */
+    // deno-lint-ignore no-explicit-any
+    objectArray: <T>(arr: T[], serializer: (obj: T) => any): any[] => arr.map(serializer),
+
+    /**
+     * Serialize an object using a provided serializer function
+     *
+     * @param obj - Object to serialize
+     * @param serializer - Function to serialize the object
+     * @returns Serialized object or undefined if input is undefined
+     */
+    // deno-lint-ignore no-explicit-any
+    optionalObject: <T>(obj: T | undefined, serializer: (obj: T) => any): any | undefined =>
+      obj ? serializer(obj) : undefined,
+  }
+
+  return {
+    ...base,
+    ...(custom || {}),
+    // deno-lint-ignore no-explicit-any
+    extend(more: Record<string, (...args: any[]) => any>) {
+      return { ...base, ...more };
+    },
+  }
+};
+
 
 /**
  * Check if a value is a primitive type or null/undefined

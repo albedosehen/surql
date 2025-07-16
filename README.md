@@ -1,15 +1,18 @@
-# SurQL - Promise-Based SurrealDB Query Builder
+# SurQL - SurrealDB Query Builder
 
 [![JSR Version](https://img.shields.io/jsr/v/@albedosehen/surql)](https://jsr.io/@albedosehen/surql)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/dotwin/dotwin)
 
-SurQL is a modern, type-safe query builder for SurrealDB designed for Deno. It provides a fluent interface for building complex queries using native JavaScript Promises, eliminating external dependencies while maintaining excellent developer experience.
+I built SurQL to be a modern, type-safe query builder for SurrealDB available for Deno. It provides a fluent interface for building complex queries using native TypeScript. It also aims to simplify client instantiation, ease data manipulation, and improve the security posture for developers and users using sanitization techniques. This library is designed to be used with Deno, leveraging its native Promise support and TypeScript capabilities.
+
+Don't know what SurrealDB is? [Learn more about the modern database here!](https://surrealdb.com/)
 
 ## ✨ Features
 
 ### Core Features
 
+- **Fluent Builder API**: Chainable methods for complex data operations
 - **Native Promises**: Built with standard JavaScript Promises - no external dependencies
 - **Deno First**: Designed specifically for Deno with proper import conventions
 - **Type Safe**: Full TypeScript support with generic types and strict typing
@@ -29,10 +32,9 @@ SurQL is a modern, type-safe query builder for SurrealDB designed for Deno. It p
 
 ### Advanced CRUD Operations
 
-- **Merge Operations**: Partial data updates preserving existing fields
-- **JSON Patch Support**: RFC 6902 compliant patch operations (add, remove, replace, move, copy, test)
-- **Upsert Operations**: Smart insert-or-update with conflict resolution
-- **Fluent Builder API**: Chainable methods for complex data operations
+- **Merge Operations**: Partial data updates preserving existing fields!
+- **JSON Patch Support**: RFC 6902 compliant patch operations (add, remove, replace, move, copy, test)!
+- **Upsert Operations**: Smart insert-or-update with automatic conflict resolution!
 
 ### Enhanced Query Builder
 
@@ -44,10 +46,10 @@ SurQL is a modern, type-safe query builder for SurrealDB designed for Deno. It p
 
 ### Quality & Testing
 
-- **Well Tested**: Comprehensive test suite with 95%+ coverage (1,970+ test lines)
-- **Well Documented**: Complete examples and migration guides
-- **Security Focused**: Input validation and injection prevention
-- **Backward Compatible**: All existing APIs remain unchanged
+- **Well Tested**: Comprehensive testing
+- **Well Documented**: Robust examples and API documentation (*Coming soon*)
+- **Security Minded**: Input validation and injection prevention
+- **Error Handling**: Rich error types for all operations with sensitive string handling
 
 ## Documentation
 
@@ -55,17 +57,13 @@ SurQL is a modern, type-safe query builder for SurrealDB designed for Deno. It p
 
 ## Installation
 
-### Simply import from JSR in your file
+Simply import from JSR in your file
 
 ```typescript
-// Import directly from JSR
-import { query, create, update, remove, SurrealConnectionManager, Serialized, createSerializer } from "jsr:@albedosehen/surql"
-
-// Or import from URL (when published)
-import { query, create, update, remove, SurrealConnectionManager, Serialized, createSerializer } from "https://deno.land/x/surql/mod.ts"
+import { query, SurrealConnectionManager } from "jsr:@albedosehen/surql"
 ```
 
-### Or update your imports and create an alias in `deno.json`
+Or update your imports and create an alias in `deno.json`
 
 ```json
 {
@@ -76,10 +74,12 @@ import { query, create, update, remove, SurrealConnectionManager, Serialized, cr
 ```
 
 ```typescript
-import { query, create, update, remove, SurrealConnectionManager, Serialized, createSerializer } from "surql"
+import { query, SurrealConnectionManager } from "surql"
 ```
 
-## ⚡ Quick Start
+## Getting Started
+
+To get started, you'll need to first have your SurrealDB server running and reachable.
 
 ### Connecting to your SurrealDB server
 
@@ -179,7 +179,7 @@ try {
 }
 ```
 
-### Smart Defaults Example (New)
+### Smart Defaults Example
 
 ```typescript
 import { SurQLClient, Serialized, createSerializer } from "surql"
@@ -506,14 +506,14 @@ const paginatedResults = await client.query('users')
   .offset(50)
   .execute()
 
-// New page() method
+// Using offset-based pagination
 const pageResults = await client.query('products')
   .where({ in_stock: true })
   .orderBy('name')
   .page(3, 20) // Page 3, 20 items per page
   .execute()
 
-// Complex pagination with grouping
+// Complex example
 const groupedPage = await client.query('analytics')
   .groupBy('date', 'channel')
   .sum('visits')
@@ -526,7 +526,10 @@ const groupedPage = await client.query('analytics')
 
 ### Reading Data
 
-#### Simple Queries
+You probably want to read data from your SurrealDB instance. SurQL provides a fluent interface for building queries and executing them.
+Here are some simple examples to get you started.
+
+#### Simple Read Queries
 
 ```typescript
 // Get all users with raw SurrealDB types (T = R default)
@@ -548,7 +551,7 @@ const firstUser = await client.query<UserRaw, User>('users')
   .first()
 ```
 
-#### Advanced Filtering
+### Filtering Data
 
 ```typescript
 // Object-style WHERE conditions with raw types
@@ -755,232 +758,42 @@ const transformedUsers = await query<UserRaw, User>(connectionProvider, userTabl
   .execute() // Returns User[] with transformed types
 ```
 
-### Serialized `<T>` Utility Type
+### Serializer Helpers
 
-Automatically converts SurrealDB types to their serialized equivalents:
+ Serialized `<T>` Utility Type Automatically converts SurrealDB types to their serialized equivalents. Useful for consistent data mapping in an application.
+ The benefit of this is that it simplifies the process of working with complex data structures by providing a clear and consistent way to transform data between different formats.
 
-```typescript
-interface UserRaw {
-  id: RecordId
-  username: string
-  email: string
-  created_at: Date
-  profile: {
-    bio: string
-    avatar_url?: string
-  }
-}
-
-// Automatic type conversion
-type User = Serialized<UserRaw>
-// Result: {
-//   id: string;
-//   username: string;
-//   email: string;
-//   created_at: string;
-//   profile: {
-//     bio: string;
-//     avatar_url?: string;
-//   }
-// }
-```
-
-### createSerializer() Helper Functions
-
-Provides robust transformation utilities that handle complex data structures, edge cases, and provide reusable conversion logic:
-
-```typescript
-import { createSerializer } from "surql"
-
-// Complex data structure with arrays, optional fields, and nested objects
-interface PostRaw {
-  id: RecordId
-  authorId: RecordId
-  collaboratorIds: RecordId[]
-  categoryId?: RecordId
-  publishedAt: Date
-  updatedAt?: Date
-  archivedAt: Date | null
-  tags: { id: RecordId; name: string; createdAt: Date }[]
-  metadata: {
-    viewCount: number
-    lastViewed?: Date
-  }
-}
-
-interface Post {
-  id: string
-  authorId: string
-  collaboratorIds: string[]
-  categoryId?: string
-  publishedAt: string
-  updatedAt?: string
-  archivedAt: string | null
-  tags: { id: string; name: string; createdAt: string }[]
-  metadata: {
-    viewCount: number
-    lastViewed?: string
-  }
-}
-
-// Create reusable serializer for consistent transformations
-const serializer = createSerializer<PostRaw>()
-
-// Complex mapper handling arrays, optional fields, and nested transformations
-const mapPost = (raw: PostRaw): Post => ({
-  id: serializer.id(raw),
-  authorId: serializer.id(raw, 'authorId'),
-  collaboratorIds: serializer.recordIdArray(raw.collaboratorIds),
-  categoryId: serializer.optionalId(raw.categoryId),
-  publishedAt: serializer.date(raw.publishedAt),
-  updatedAt: serializer.optionalDate(raw.updatedAt),
-  archivedAt: serializer.nullableDate(raw.archivedAt),
-  tags: raw.tags.map(tag => ({
-    id: serializer.id(tag),
-    name: tag.name,
-    createdAt: serializer.date(tag.createdAt)
-  })),
-  metadata: {
-    viewCount: raw.metadata.viewCount,
-    lastViewed: serializer.optionalDate(raw.metadata.lastViewed)
-  }
-})
-
-// Reuse same serializer across different mappers for consistency
-const mapAuthor = (raw: UserRaw): Author => ({
-  id: serializer.id(raw),
-  joinedAt: serializer.date(raw.created_at),
-  lastActive: serializer.optionalDate(raw.lastActive)
-})
-
-const mapComment = (raw: CommentRaw): Comment => ({
-  id: serializer.id(raw),
-  postId: serializer.id(raw, 'postId'),
-  authorId: serializer.id(raw, 'authorId'),
-  createdAt: serializer.date(raw.createdAt),
-  editedAt: serializer.optionalDate(raw.editedAt)
-})
-
-// Compare with a manual approach without the serializer
-//
-const mapPostManual = (raw: PostRaw): Post => ({
-  id: raw.id?.toString() ?? '',
-  authorId: raw.authorId?.toString() ?? '',
-  collaboratorIds: raw.collaboratorIds?.map(id => id?.toString()).filter(Boolean) ?? [],
-  categoryId: raw.categoryId ? raw.categoryId.toString() : undefined,
-  publishedAt: raw.publishedAt?.toISOString() ?? '',
-  updatedAt: raw.updatedAt ? raw.updatedAt.toISOString() : undefined,
-  archivedAt: raw.archivedAt ? raw.archivedAt.toISOString() : null,
-  tags: raw.tags?.map(tag => ({
-    id: tag.id?.toString() ?? '',
-    name: tag.name,
-    createdAt: tag.createdAt?.toISOString() ?? ''
-  })) ?? [],
-  metadata: {
-    viewCount: raw.metadata?.viewCount ?? 0,
-    lastViewed: raw.metadata?.lastViewed ? raw.metadata.lastViewed.toISOString() : undefined
-  }
-})
-
-// Use serializer with error handling and consistent transformations
-try {
-  const posts = await query<PostRaw, Post>(connectionProvider, postTable)
-    .where({ published: true })
-    .map(mapPost) // Clean, consistent, handles all edge cases
-    .execute()
-
-  const authors = await query<UserRaw, Author>(connectionProvider, userTable)
-    .where({ role: 'author' })
-    .map(mapAuthor) // Reuses same serializer logic
-    .execute()
-
-  console.log('Posts with consistent formatting:', posts)
-  console.log('Authors with consistent formatting:', authors)
-} catch (error) {
-  console.error('Transformation error handled gracefully:', error)
-}
-```
-
-#### Benefits Of The Serializer Helper
-
-**🛡️ Robust Edge Case Handling:**
-
-- `serializer.optionalId()` - Safely handles `RecordId | undefined`
-- `serializer.nullableDate()` - Properly handles `Date | null`
-- `serializer.recordIdArray()` - Transforms arrays while filtering invalid entries
-- Consistent `null` vs `undefined` handling
-
-**🔄 Reusability & Consistency:**
-
-- Same serializer instance across multiple mappers
-- Consistent transformation logic throughout application
-- Reduced code duplication and maintenance burden
-- Standardized error handling
-
-**🚨 Error Prevention:**
-
-- No more manual null checking for every field
-- Automatic filtering of invalid array entries
-- Type-safe transformations with proper fallbacks
-- Prevents runtime errors from malformed data
-
-**🗑️ Cleaner Syntax:**
-
-- Eliminates repetitive `?.toString()` and `?.toISOString()` calls
-- Reduces cognitive load when reading transformation code
-- Self-documenting transformation intent
-- Easier to maintain and modify
+The `createSerializer` Provides a simple set of transformation utilities to handle common complex data structures, edge cases, and provide reusable conversion logic. Refer to `examples/complexMapping.ts` for examples.
 
 ### Optional Mapping with Warnings
 
-Functions provide helpful warnings when no mapper is provided but still return results:
+Functions provide helpful warnings when no mapper is provided but still return results. You can suppress these warnings as desired.
+
+I may change the defaults for this in the future if the warnings are annoying. You can mix any of these patterns freely in your application.
 
 ```typescript
-// This will work but show a development warning
+const rawUsers = await query<UserRaw>(connectionProvider, userTable)
+  .map((raw) => ({ ... }))
+  .execute() // No warnings, explicit mapping provided
+
 const rawUsers = await query<UserRaw>(connectionProvider, userTable)
   .execute() // Warning: Consider using .map() for type transformation
 
-// Suppress warning with explicit raw data usage
 const rawUsers = await query<UserRaw>(connectionProvider, userTable, { warnings: 'suppress' })
-  .execute() // Use raw SurrealDB types intentionally
-```
-
-### Mixing Patterns
-
-You can mix both patterns in the same application based on your needs:
-
-```typescript
-// Quick prototyping - use raw types
-const rawData = await query<PostRaw>(connectionProvider, postTable)
-  .where({ published: true })
-  .execute()
-
-// Production code - use explicit transformation
-const posts = await query<PostRaw, Post>(connectionProvider, postTable)
-  .where({ published: true })
-  .map(mapPost)
-  .execute()
-
-// Utility types for gradual migration
-type Post = Serialized<PostRaw>
-const serializer = createSerializer<PostRaw>()
+  .execute() // Suppress warning with explicit raw data usage
 ```
 
 ## 👾 Error Handling
 
-SurQL uses standard JavaScript Promise patterns with enhanced error types.
+SurQL uses standard JavaScript Promise patterns with enhanced error types for easier troubleshooting and debugging.
+The below examples are snippets of *some* error types and error handling patterns. These are optional and are provided for convenience.
 
 ### Authentication Errors
 
+Examples with error types to handle authentication issues:
+
 ```typescript
-import {
-  AuthenticationError,
-  SessionExpiredError,
-  InvalidCredentialsError,
-  InvalidTokenError,
-  SignupError,
-  ScopeAuthenticationError
-} from "surql"
+// ...
 
 try {
   await client.signin({
@@ -1000,8 +813,15 @@ try {
     console.error('Authentication error:', error.code, error.message)
   }
 }
+```
 
-// Session management errors
+### Session Management Errors
+
+Examples with error types to handle session management issues:
+
+```typescript
+//...
+
 try {
   const sessionInfo = await client.info()
 } catch (error) {
@@ -1015,12 +835,14 @@ try {
 }
 ```
 
-### CRUD Operation Errors
+### Query & Operation Errors
+
+Examples with errors types to handle various query / CRUD operation issues:
 
 ```typescript
-import { PatchOperationError } from "surql"
+//...
 
-// Patch operation errors
+// Patch operation error example
 try {
   await client.patch('users', 'user:123', [
     { op: 'invalid', path: '/field', value: 'test' } // Invalid operation
@@ -1031,8 +853,12 @@ try {
     console.error('Operation:', error.operation)
   }
 }
+```
 
-// Merge/Upsert errors
+```typescript
+//...
+
+// Merge/Upsert error example
 try {
   await client.merge('users', 'nonexistent:id', { name: 'test' }).execute()
 } catch (error) {
@@ -1042,7 +868,10 @@ try {
 }
 ```
 
-### Try-Catch Pattern
+#### Try-Catch Pattern
+
+SurQL supports both async/await and Promise chain patterns for error handling following standard JavaScript practices.
+There is no special syntax for error handling when using SurQL, so standard JavaScript error handling patterns apply.
 
 ```typescript
 try {
@@ -1061,7 +890,7 @@ try {
 }
 ```
 
-### Promise Chain Pattern
+#### Promise Chain Pattern
 
 ```typescript
 client.query<UserRaw, User>('users')
@@ -1078,12 +907,39 @@ client.query<UserRaw, User>('users')
   })
 ```
 
-## 🔧 Advanced Usage
+## Connection Management
 
-### Connection Management
+SurQL provides a `SurQLClient` and `SurrealConnectionManager` classes for managing authentication & connections to the database.
+Both work similarly, but the class you choose depends upon your needs.
+
+- If you require multiple concurrent operations/connections -> `SurrealConnectionManager`
+- If you need a simpler interface for a single connection -> `SurQLClient`
+
+### SurQLClient
+
+SurQL also provides a `SurQLClient` that wraps the connection manager and provides a more convenient interface for authentication and session management for lighter use cases.
+Useful for accessing all of SurQL's features from a single client instance or when first working with the query builder.
 
 ```typescript
-// Connection pooling is handled automatically
+// Create SurQL client with connection manager
+const client = new SurQLClient(config)
+
+// Use the client for queries
+const users = await client.query<UserRaw, User>('users')
+  .where({ active: true })
+  .map(mapUser)
+  .execute()
+
+console.log('Success:', users)
+```
+
+### SurrealConnectionManager
+
+SurQL provides a `SurrealConnectionManager` to handle connection pooling and management automatically. This allows you to reuse connections across multiple operations without worrying about connection lifecycle.
+This also means that you can perform multiple queries concurrently without creating new connections each time, or having to pass around a connection instance.
+
+```typescript
+// Connection pooling is handled automatically for you
 const connectionProvider = new SurrealConnectionManager(config)
 
 // Use across multiple operations
@@ -1170,242 +1026,49 @@ const usersWithAgeManual = await query<UserRaw, User & { age: number }>(connecti
   .execute()
 ```
 
-## Performance
-
-SurQL is optimized for performance with:
-
-- **Minimal external dependencies** - Deno-first design with only the `surrealdb` package
-- **Native Promise execution** - Direct Promise chains without wrappers
-- **Efficient connection pooling** - Automatic connection reuse
-- **TypeScript optimizations** - Compile-time type checking
-
-## Testing
-
-```bash
-# Run all tests
-deno test --allow-read --allow-write --allow-net --allow-sys
-
-# Run specific test files
-deno test src/read_test.ts src/write_test.ts --allow-read --allow-write --allow-net --allow-sys
-
-# Run with coverage
-deno task test:coverage
-```
-
-## 🔒 Security Considerations
-
-### Authentication Security
-
-```typescript
-// Use environment variables for credentials
-const client = new SurQLClient({
-  host: process.env.SURREALDB_HOST,
-  port: process.env.SURREALDB_PORT,
-  namespace: process.env.SURREALDB_NAMESPACE,
-  database: process.env.SURREALDB_DATABASE
-})
-
-// Secure credential handling
-try {
-  const token = await client.signin({
-    type: 'scope',
-    namespace: 'myapp',
-    database: 'prod',
-    scope: 'user',
-    username: userInput.username, // Validated input
-    password: userInput.password  // Secure password handling
-  })
-
-  // Store token securely (not in localStorage in browsers)
-  secureStorage.setToken(token.token)
-} catch (error) {
-  // Don't expose internal errors to users
-  console.error('Authentication failed:', error)
-  throw new Error('Invalid credentials')
-}
-```
-
-### Query Security
-
-```typescript
-// All user inputs are automatically parameterized
-const safeResults = await client.query('users')
-  .where('email', Op.EQUALS, userEmail) // Automatically parameterized
-  .where({ role: userRole }) // Safe object syntax
-  .execute()
-
-// Field names are validated to prevent injection
-try {
-  await client.query('users')
-    .groupBy('valid_field_name') // Validated against injection patterns
-    .having('COUNT(*)', Op.GREATER_THAN, 10) // Parameterized values
-    .execute()
-} catch (error) {
-  // Invalid field names throw validation errors
-}
-```
-
-### New Authentication Features
-
-```typescript
-// Before: Manual credential management
-const connectionProvider = new SurrealConnectionManager({
-  username: 'user',
-  password: 'pass'
-})
-
-// After: Full authentication lifecycle
-const client = new SurQLClient(config)
-await client.signin({ type: 'scope', ... })
-// Automatic token management, session tracking, etc.
-```
-
-### New CRUD Operations
-
-```typescript
-// Before: Manual UPDATE queries for partial updates
-await client.query('UPDATE user:123 SET email = $email', { email: newEmail })
-
-// After: Semantic merge operations
-await client.merge('users', 'user:123', { email: newEmail }).execute()
-
-// Before: Complex conditional logic for upserts
-// After: Built-in upsert with conflict resolution
-await client.upsert('users', userData).onConflict('username').execute()
-```
-
-### Enhanced Query Capabilities
-
-```typescript
-// Before: Manual GROUP BY and aggregation queries
-await client.query('SELECT category, COUNT(*) as count FROM products GROUP BY category')
-
-// After: Fluent aggregation API
-await client.query('products')
-  .groupBy('category')
-  .count()
-  .having('COUNT(*)', Op.GREATER_THAN, 10)
-  .execute()
-```
-
 ## Examples
 
-### E-commerce with Authentication
+Examples are available in the `examples/` directory. They assume you have a SurrealDB instance and the necessary database/schema set up.
 
-```typescript
-// Authenticate as admin
-await client.signin({
-  type: 'scope',
-  namespace: 'ecommerce',
-  database: 'production',
-  scope: 'admin',
-  username: 'admin@store.com',
-  password: process.env.ADMIN_PASSWORD
-})
-
-// Get premium customers with enhanced analytics
-const premiumInsights = await client.query('orders')
-  .groupBy('customer_id')
-  .sum('total_amount')
-  .count('order_id')
-  .avg('order_value')
-  .having('SUM(total_amount)', Op.GREATER_THAN, 10000)
-  .having('COUNT(order_id)', Op.GREATER_THAN, 20)
-  .orderBy('sum_total_amount', SortDirection.DESC)
-  .page(1, 50)
-  .execute()
-
-// Upsert product with inventory management
-const product = await client.upsert('products', {
-  sku: 'WIDGET-PRO-2024',
-  name: 'Widget Pro 2024',
-  price: 299.99,
-  category: 'electronics',
-  inventory: 150
-})
-  .withId('product:widget-pro-2024')
-  .execute()
-
-// Apply dynamic pricing with patch operations
-await client.patch('products', product.id, [
-  { op: 'replace', path: '/price', value: 279.99 },
-  { op: 'add', path: '/sale_end_date', value: '2024-12-31' },
-  { op: 'add', path: '/tags/-', value: 'on-sale' }
-])
-  .execute()
+```bash
+# Run a specific example
+deno run -A examples/basicCrud.ts
 ```
 
-### User Management with Session Tracking
+## 🤓 Contributing
 
-```typescript
-// Authenticate user
-const token = await client.signin({
-  type: 'scope',
-  namespace: 'myapp',
-  database: 'users',
-  scope: 'user',
-  username: 'user@example.com',
-  password: userPassword
-})
+Want to contribute? Please see my ***non-existing*** [Contributing Guidelines](./CONTRIBUTING.md) for details. For now, just open an issue or PR with your ideas!
 
-// Get user analytics with session info
-const userStats = await client.query('user_sessions')
-  .where('user_id', Op.EQUALS, (await client.info()).id)
-  .groupBy('device_type', 'location')
-  .count('session_id')
-  .sum('duration_minutes')
-  .having('COUNT(session_id)', Op.GREATER_THAN, 5)
-  .orderBy('sum_duration_minutes', SortDirection.DESC)
-  .execute()
+### Local Development Setup
 
-// Bulk user activation with merge operations
-const inactiveUsers = await client.query('users')
-  .where({ status: 'inactive' })
-  .where('last_login', Op.LESS_THAN, new Date('2024-01-01'))
-  .execute()
+Clone the repository and make your changes in the `src` directory. Provide clear commit messages and follow the project's coding style.
 
-for (const user of inactiveUsers) {
-  await client.merge('users', user.id, {
-    status: 'reactivated',
-    reactivation_date: new Date(),
-    'notifications.reactivation_sent': true
-  }).execute()
-}
-
-// Logout and cleanup
-await client.invalidate()
-```
-
-## 🤝 Contributing
-
-We welcome contributions! Please see our [Contributing Guidelines](./CONTRIBUTING.md) for details.
-
-### Development Setup
+Clone the repository. Tasks are defined in the `deno.json` file.
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourorg/surql.git
+git clone https://github.com/albedosehen/surql.git
 cd surql
-
-# Run tests
-deno task test
-
-# Run linting
-deno task lint
-
-# Format code
-deno task fmt
 ```
 
-## 📄 License
+You should run these yourself before pushing to the repository. GitHub actions will also run these tasks automatically to check the code.
+
+- `deno check` to check for type errors
+- `deno lint` to run the linter
+- `deno fmt` to format the code
+- `deno task test` to run the tests
+
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🙏 Acknowledgments
+## ❤️ Acknowledgments
 
 - Built for the [SurrealDB](https://surrealdb.com/) ecosystem
-- Inspired by modern query builders and TypeScript best practices
-- Optimized for [Deno](https://deno.land/) runtime
+- Designed for [Deno](https://deno.land/), *the superior JavaScript runtime* 🦖
+- Inspired by modern query builders (LINQ, SQLAlchemy, etc.)
+
+***Note:** I am not affiliated with SurrealDB or Deno. This is an independent project built to enhance the SurrealDB experience for developers using Deno.*
 
 ---
 

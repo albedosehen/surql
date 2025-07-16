@@ -1,13 +1,26 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
+## [0.2.4] - 2025-07-16
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+### Added - New Features in v0.2.4
+
+- **Custom Serializer Support**
+  - Introduced `createSerializer<T>()` utility for custom serialization logic.
+  - Enhanced type safety with `Serialized<T>` type for serialized models.
+  - Example usage in `examples/customMapping.ts` demonstrating custom mapping of user data.
+
+### Updated - Documentation
+
+- **README.md**: Simplified documentation and rewrote examples in `examples/` directory.
+- **Custom Mapping Example**: Updated `examples/customMapping.ts` to showcase custom serialization and mapping of data.
+- **TypeScript Signatures**: Improved type signatures in examples for better clarity in the serializer.
+- **Error Handling Patterns**: Added examples of error handling patterns in the documentation.
+
+---
 
 ## [0.2.3] - 2025-07-15
 
-### Added - Enterprise Features
+### Added - New Features in v0.2.3
 
 #### Enhanced Authentication System
 
@@ -52,14 +65,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Integration test suite** ensuring feature interoperability
 - **Security validation tests** for injection prevention
 
-### Enhanced
+### Updated - Internals
 
 - **Type system improvements** with automatic serialization utilities
 - **Error handling framework** with context-aware error classes
 - **Client architecture** with factory methods and capability-based mixins
 - **Performance optimizations** for query building and execution
 
-### Security
+### Updated - Safe Strings
 
 - **Production-ready input validation** across all user-facing APIs
 - **Enhanced credential security** with automatic token lifecycle management
@@ -88,20 +101,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Credential validation framework** with security best practices
 - **Path validation system** for secure operations
 
-### Enhanced Project Structure
+#### Project Structure
 
 - **Core client architecture** with modular design patterns
 - **Utility functions** for data handling and validation
 - **Error handling infrastructure** with specific error types
 - **Testing framework foundation** for comprehensive coverage
 
+---
+
 ## [0.2.2] - 2025-07-14
 
 - **Updated**: Minor updates to documentation.
 
+---
+
 ## [0.2.1] - 2025-07-13
 
 - **Updated**: Minor updates to documentation.
+
+---
 
 ## [0.2.0] - 2025-07-13
 
@@ -232,3 +251,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Utility types and serialization helpers
 
 ---
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
