@@ -9,11 +9,16 @@
 !src/
 !src/**
 
+!scripts/
+!scripts/**
+
 !test/
 !test/**
 
 !.gitignore
+!.npmignore
 !CHANGELOG.md
+!PUBLISHING.md
 !deno.json
 !deno.lock
 !mod.ts

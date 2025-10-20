@@ -1,0 +1,29 @@
+# Source files (already compiled to npm/)
+src/
+scripts/
+examples/
+
+# Deno specific files
+deno.json
+deno.lock
+mod.ts
+
+# Development files
+.vscode/
+.github/
+coverage/
+
+# Test files
+**/*.test.ts
+**/test/
+
+# Documentation (already copied to npm/)
+# README.md, LICENSE, CHANGELOG.md are copied by the build script
+
+# Build artifacts
+dist/
+
+# Git
+.git/
+.gitignore
+.gitattributes

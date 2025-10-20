@@ -1,10 +1,11 @@
 # SurQL - SurrealDB Query Builder
 
 [![JSR Version](https://img.shields.io/jsr/v/@albedosehen/surql)](https://jsr.io/@albedosehen/surql)
+[![NPM Version](https://img.shields.io/npm/v/@albedosehen/surql)](https://www.npmjs.com/package/@albedosehen/surql)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/dotwin/dotwin)
 
-I built SurQL to be a modern, type-safe query builder for SurrealDB available for Deno. It provides a fluent interface for building complex queries using native TypeScript. It also aims to simplify client instantiation, ease data manipulation, and improve the security posture for developers and users using sanitization techniques. This library is designed to be used with Deno, leveraging its native Promise support and TypeScript capabilities.
+I built SurQL to be a modern, type-safe query builder for SurrealDB available for Deno and Node.js. It provides a fluent interface for building complex queries using native TypeScript. It also aims to simplify client instantiation, ease data manipulation, and improve the security posture for developers and users using sanitization techniques. This library is designed to work seamlessly with both Deno and Node.js runtimes, leveraging native Promise support and TypeScript capabilities.
 
 Don't know what SurrealDB is? [Learn more about the modern database here!](https://surrealdb.com/)
 
@@ -14,7 +15,7 @@ Don't know what SurrealDB is? [Learn more about the modern database here!](https
 
 - **Fluent Builder API**: Chainable methods for complex data operations
 - **Native Promises**: Built with standard JavaScript Promises - no external dependencies
-- **Deno First**: Designed specifically for Deno with proper import conventions
+- **Multi-Runtime Support**: Works seamlessly with both Deno and Node.js (v18+)
 - **Type Safe**: Full TypeScript support with generic types and strict typing
 - **High Performance**: No abstraction overhead - direct Promise execution
 - **Fluent Interface**: Chainable methods for readable query construction
@@ -55,9 +56,6 @@ Don't know what SurrealDB is? [Learn more about the modern database here!](https
 
 - **[Changelog](./CHANGELOG.md)** - Detailed release notes and migration information
 
-Absolutely! Here’s a **clear, structured, and logically-flowing rewrite** for your SurrealDB SurQL installation and getting started docs.
-I've grouped **installation**, **authentication**, **usage**, and **smart defaults**—removing redundancy and making sure the examples and explanations are in context.
-
 ---
 
 ## SurrealDB SurQL Client – Quick Start
@@ -66,7 +64,29 @@ I've grouped **installation**, **authentication**, **usage**, and **smart defaul
 
 ### 1. Installation
 
-#### Install from JSR
+#### Install from NPM (Node.js)
+
+For Node.js projects, install via npm, yarn, or pnpm:
+
+```bash
+npm install @albedosehen/surql
+```
+
+```bash
+yarn add @albedosehen/surql
+```
+
+```bash
+pnpm add @albedosehen/surql
+```
+
+Then import in your project:
+
+```typescript
+import { SurQLClient, query, SurrealConnectionManager } from '@albedosehen/surql'
+```
+
+#### Install from JSR (Deno)
 
 In your Deno project, import SurQL directly from JSR:
 
@@ -906,7 +926,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ### ❤️ Acknowledgments
 
 - Built for the [SurrealDB](https://surrealdb.com/) ecosystem
-- Designed for [Deno](https://deno.land/), *the superior JavaScript runtime* 🦖
+- Designed for [Deno](https://deno.land/) and [Node.js](https://nodejs.org/) 🦖🟢
 - Inspired by modern query builders (LINQ, SQLAlchemy, etc.)
 
 ***Note:** I am not affiliated with SurrealDB or Deno. This is an independent project built to enhance the SurrealDB experience for developers using Deno.*
