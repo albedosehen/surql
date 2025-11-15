@@ -110,42 +110,42 @@ export class UpsertQL<R extends { id: RecordId }, T = unknown> extends QueryBuil
    *   .execute()
    */
   async execute(): Promise<T> {
-      try {
-        // Check if we have an explicit record ID from withId() method
-        let targetId = this.targetId
-  
-        // If no explicit ID is set, check if there's an 'id' field in the data
-        if (!targetId && this.upsertData.id) {
-          targetId = this.upsertData.id.toString()
-        }
-  
-        // Prepare the data - if we're using an ID from the data object, remove it from the content
-        let upsertContent = this.upsertData
-        if (!this.targetId && targetId && this.upsertData.id) {
-          // Create a copy of data without the id field to avoid duplication
-          // deno-lint-ignore no-unused-vars
-          const { id, ...rest } = this.upsertData
-          upsertContent = rest
-        }
-  
-        let query: string
-        let params: Record<string, unknown>
-  
-        if (targetId) {
-          // Upsert with specific ID - use SurrealDB's upsert capability
-          query = `UPSERT ${this.table}:${targetId} CONTENT $data`
-          params = { data: upsertContent, ...this.params }
-        } else if (this.conflictFields.length > 0) {
-          // Upsert with conflict detection - use conditional logic
-          const conflictConditions = this.conflictFields
-            .map((field, index) => {
-              const paramName = `conflict_${index}`
-              return `${field} = $${paramName}`
-            })
-            .join(' AND ')
-  
-          // Build a query that checks for existing records and updates or creates accordingly
-          query = `
+    try {
+      // Check if we have an explicit record ID from withId() method
+      let targetId = this.targetId
+
+      // If no explicit ID is set, check if there's an 'id' field in the data
+      if (!targetId && this.upsertData.id) {
+        targetId = this.upsertData.id.toString()
+      }
+
+      // Prepare the data - if we're using an ID from the data object, remove it from the content
+      let upsertContent = this.upsertData
+      if (!this.targetId && targetId && this.upsertData.id) {
+        // Create a copy of data without the id field to avoid duplication
+        // deno-lint-ignore no-unused-vars
+        const { id, ...rest } = this.upsertData
+        upsertContent = rest
+      }
+
+      let query: string
+      let params: Record<string, unknown>
+
+      if (targetId) {
+        // Upsert with specific ID - use SurrealDB's upsert capability
+        query = `UPSERT ${this.table}:${targetId} CONTENT $data`
+        params = { data: upsertContent, ...this.params }
+      } else if (this.conflictFields.length > 0) {
+        // Upsert with conflict detection - use conditional logic
+        const conflictConditions = this.conflictFields
+          .map((field, index) => {
+            const paramName = `conflict_${index}`
+            return `${field} = $${paramName}`
+          })
+          .join(' AND ')
+
+        // Build a query that checks for existing records and updates or creates accordingly
+        query = `
   					LET $existing = (SELECT * FROM ${this.table} WHERE ${conflictConditions} LIMIT 1);
   					RETURN IF $existing {
   						UPDATE $existing[0].id MERGE $data
@@ -153,38 +153,38 @@ export class UpsertQL<R extends { id: RecordId }, T = unknown> extends QueryBuil
   						CREATE ${this.table} CONTENT $data
   					};
   				`
-          params = { data: upsertContent, ...this.params }
-          
-          // Add conflict field parameters
-          const conflictParams = this.conflictFields.reduce((acc, field, index) => {
-            acc[`conflict_${index}`] = this.upsertData[field]
-            return acc
-          }, {} as Record<string, unknown>)
-          
-          params = { ...params, ...conflictParams }
-        } else {
-          // Simple upsert without ID or conflict fields - just create
-          query = `CREATE ${this.table} CONTENT $data`
-          params = { data: upsertContent, ...this.params }
-        }
-  
-        const records = await this.executeQuery<R[]>(query, params)
-  
-        if (!records || records.length === 0) {
-          throw intoSurQlError('Upsert operation returned no records')
-        }
-  
-        const mappedResult = this.mapResults(records, true)
-  
-        // For upsert operations, we expect a single result
-        return Array.isArray(mappedResult) ? mappedResult[0] : mappedResult
-      } catch (e) {
-        if (e instanceof Error && e.message.includes('returned no records')) {
-          throw e // Re-throw our specific error
-        }
-        throw intoSurQlError('Upsert operation failed:', e)
+        params = { data: upsertContent, ...this.params }
+
+        // Add conflict field parameters
+        const conflictParams = this.conflictFields.reduce((acc, field, index) => {
+          acc[`conflict_${index}`] = this.upsertData[field]
+          return acc
+        }, {} as Record<string, unknown>)
+
+        params = { ...params, ...conflictParams }
+      } else {
+        // Simple upsert without ID or conflict fields - just create
+        query = `CREATE ${this.table} CONTENT $data`
+        params = { data: upsertContent, ...this.params }
       }
+
+      const records = await this.executeQuery<R[]>(query, params)
+
+      if (!records || records.length === 0) {
+        throw intoSurQlError('Upsert operation returned no records')
+      }
+
+      const mappedResult = this.mapResults(records, true)
+
+      // For upsert operations, we expect a single result
+      return Array.isArray(mappedResult) ? mappedResult[0] : mappedResult
+    } catch (e) {
+      if (e instanceof Error && e.message.includes('returned no records')) {
+        throw e // Re-throw our specific error
+      }
+      throw intoSurQlError('Upsert operation failed:', e)
     }
+  }
 
   /**
    * Validate field name to prevent injection attacks
