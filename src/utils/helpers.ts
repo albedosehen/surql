@@ -53,8 +53,13 @@ export function truncateMessage(message: string, maxLength: number): string {
  * @returns true if in production, false otherwise
  */
 export function isProductionEnvironment(): boolean {
-  const env = Deno.env.get('DENO_ENV') || Deno.env.get('ENV') || 'development'
-  return env === 'production'
+  try {
+    const env = Deno.env.get('DENO_ENV') || Deno.env.get('ENV') || 'development'
+    return env === 'production'
+  } catch {
+    // If we can't access environment variables, default to development
+    return false
+  }
 }
 
 /**
@@ -226,7 +231,7 @@ async function verifyJWTSignature(token: string, secret: string, algorithm: stri
     ['verify'],
   )
 
-  const signature = base64UrlToUint8Array(signatureB64)
+  const signature = base64UrlToUint8Array(signatureB64).buffer as ArrayBuffer
   const isValid = await globalThis.crypto.subtle.verify(
     'HMAC',
     key,
