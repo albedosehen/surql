@@ -54,7 +54,7 @@ export class CreateQL<R extends { id: RecordId }, T = unknown> extends QueryBuil
     let createData = this.data
     if (!this.recordId && targetId && this.data.id) {
       // Create a copy of data without the id field to avoid duplication
-      const { id, ...rest } = this.data
+      const { _id, ...rest } = this.data
       createData = rest
     }
 

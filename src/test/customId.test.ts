@@ -1,4 +1,4 @@
-import { assert, assertEquals, assertNotEquals } from '@std/assert'
+import { assertEquals, assertNotEquals } from '@std/assert'
 import { create } from '../crud/write.ts'
 import { describe, it } from '@std/testing/bdd'
 import { RecordId } from 'surrealdb'
