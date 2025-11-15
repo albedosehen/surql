@@ -456,6 +456,8 @@ const partialUsers = await query<UserRaw>(connectionProvider, userTable)
 
 ### 4. Creating Data
 
+#### Basic Create Operations
+
 ```typescript
 // Raw types
 const newRawUser = await create<UserRaw>(connectionProvider, userTable, {
@@ -477,6 +479,37 @@ const newUser = await create<UserRaw, User>(connectionProvider, userTable, {
 
 console.log('Created transformed user:', newUser);
 ```
+
+#### Create with Custom IDs
+
+SurQL supports three ways to specify custom IDs for created records:
+
+```typescript
+// 1. Auto-generated ID (default behavior)
+const user1 = await create(connectionProvider, 'users', {
+  name: 'John Doe',
+  email: 'john@example.com'
+}).execute()
+
+// 2. Explicit ID via withId() method
+const user2 = await create(connectionProvider, 'users', {
+  name: 'Jane Smith',
+  email: 'jane@example.com'
+})
+  .withId('user:jane-smith')
+  .execute()
+
+// 3. ID from data object
+const user3 = await create(connectionProvider, 'users', {
+  id: 'user:bob-johnson',
+  name: 'Bob Johnson',
+  email: 'bob@example.com'
+}).execute()
+```
+
+When an ID is provided in the data object, it will be automatically extracted and used for the record creation, while being removed from the content to avoid duplication in the stored record.
+
+The `withId()` method takes precedence over an ID specified in the data object, allowing you to override the ID from data when needed.
 
 ---
 

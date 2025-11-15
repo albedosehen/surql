@@ -11,6 +11,7 @@ import type { SurrealDbTable } from '../crud/types.ts'
  */
 export class CreateQL<R extends { id: RecordId }, T = unknown> extends QueryBuilder<R, T> {
   private data: Record<string, unknown>
+  private recordId?: string
 
   /**
    * Create a new CreateQL builder for the specified table
@@ -41,7 +42,37 @@ export class CreateQL<R extends { id: RecordId }, T = unknown> extends QueryBuil
    *  .execute()
    */
   async execute(): Promise<T> {
-    const record = await this.executeQuery<R[]>(`CREATE ${this.table} CONTENT $data`, { data: this.data })
+    // Check if we have an explicit record ID from withId() method
+    let targetId = this.recordId
+
+    // If no explicit ID is set, check if there's an 'id' field in the data
+    if (!targetId && this.data.id) {
+      targetId = this.data.id.toString()
+    }
+
+    // Prepare the data - if we're using an ID from the data object, remove it from the content
+    let createData = this.data
+    if (!this.recordId && targetId && this.data.id) {
+      // Create a copy of data without the id field to avoid duplication
+      const { id, ...rest } = this.data
+      createData = rest
+    }
+
+    // Build the appropriate query based on whether we have a target ID
+    let query: string
+    let params: Record<string, unknown>
+
+    if (targetId) {
+      // Use explicit record ID with SurrealDB's CREATE table:id CONTENT syntax
+      query = `CREATE ${this.table}:${targetId} CONTENT $data`
+      params = { data: createData }
+    } else {
+      // Use auto-generated ID with standard CREATE table CONTENT syntax
+      query = `CREATE ${this.table} CONTENT $data`
+      params = { data: createData }
+    }
+
+    const record = await this.executeQuery<R[]>(query, params)
 
     if (!record || record.length === 0) {
       throw intoSurQlError('Create operation returned no records')
@@ -52,6 +83,26 @@ export class CreateQL<R extends { id: RecordId }, T = unknown> extends QueryBuil
     // TODO(@albedosehen): Handle multiple records edge-case if I encounter it
     // Expect a single result for create operations
     return Array.isArray(mappedResult) ? mappedResult[0] : mappedResult
+  }
+
+  /**
+   * Specify the record ID for create operation
+   *
+   * @param id - Record ID to use for the create operation
+   * @returns this - For method chaining
+   * @example
+   * const user = await create(connectionProvider, 'users', {
+   *   username: 'jane_doe',
+   *   email: 'jane@example.com',
+   *   name: 'Jane Doe'
+   * })
+   *   .withId('user:jane')
+   *   .map(mapUser)
+   *   .execute()
+   */
+  withId(id: string | RecordId): this {
+    this.recordId = id.toString()
+    return this
   }
 }
 

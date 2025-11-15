@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.0] - 2025-11-14
+
+### Added - New Features in v0.3.0
+
+- **Custom ID Support**
+  - Introduced the ability to define a custom `RecordId` for SurQL `write` operations.
+  - Updated the `upsert` operations to accept custom `RecordId` values.
+
 ## [0.2.5] - 2025-07-15
 
 - **Updated**: Minor updates to documentation.
