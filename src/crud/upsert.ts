@@ -123,8 +123,8 @@ export class UpsertQL<R extends { id: RecordId }, T = unknown> extends QueryBuil
       let upsertContent = this.upsertData
       if (!this.targetId && targetId && this.upsertData.id) {
         // Create a copy of data without the id field to avoid duplication
-        // deno-lint-ignore no-unused-vars
-        const { id, ...rest } = this.upsertData
+
+        const { _id, ...rest } = this.upsertData
         upsertContent = rest
       }
 
