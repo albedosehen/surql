@@ -1,15 +1,14 @@
 # SurQL - SurrealDB Query Builder
 
-[![JSR Version](https://img.shields.io/jsr/v/@albedosehen/surql)](https://jsr.io/@albedosehen/surql)
-[![NPM Version](https://img.shields.io/npm/v/@albedosehen/surql)](https://www.npmjs.com/package/@albedosehen/surql)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/dotwin/dotwin)
+[![JSR Version](https://img.shields.io/jsr/v/@albedosehen/surql)](https://jsr.io/@albedosehen/surql)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 I built SurQL to be a modern, type-safe query builder for SurrealDB available for Deno and Node.js. It provides a fluent interface for building complex queries using native TypeScript. It also aims to simplify client instantiation, ease data manipulation, and improve the security posture for developers and users using sanitization techniques. This library is designed to work seamlessly with both Deno and Node.js runtimes, leveraging native Promise support and TypeScript capabilities.
 
 Don't know what SurrealDB is? [Learn more about the modern database here!](https://surrealdb.com/)
 
-## ✨ Features
+## Features
 
 ### Core Features
 
@@ -701,7 +700,7 @@ const groupedPage = await client.query('analytics')
 
 ---
 
-### 🔩 Utility Types & Helpers
+### Utility Types & Helpers
 
 SurQL provides powerful utility types and helper functions to enhance DX while maintaining type safety.
 
@@ -730,17 +729,14 @@ const rawUsers = await query<UserRaw>(connectionProvider, userTable, { warnings:
   .execute() // Suppress warning with explicit raw data usage
 ```
 
-### 👾 Error Handling
+### Error Handling
 
 SurQL uses standard JavaScript Promise patterns with enhanced error types for easier troubleshooting and debugging.
 The below examples are snippets of *some* error types and error handling patterns. These are optional and are provided for convenience.
 
 #### Authentication Errors
 
-Examples with error types to handle authentication issues:
-
 ```typescript
-// ...
 
 try {
   await client.signin({
@@ -764,8 +760,6 @@ try {
 
 #### Session Management Errors
 
-Examples with error types to handle session management issues:
-
 ```typescript
 //...
 
@@ -783,8 +777,6 @@ try {
 ```
 
 #### Query & Operation Errors
-
-Examples with errors types to handle various query / CRUD operation issues:
 
 ```typescript
 //...
@@ -815,10 +807,7 @@ try {
 }
 ```
 
-##### Try-Catch Pattern
-
-SurQL supports both async/await and Promise chain patterns for error handling following standard JavaScript practices.
-There is no special syntax for error handling when using SurQL, so standard JavaScript error handling patterns apply.
+#### Try-Catch Pattern
 
 ```typescript
 try {
@@ -866,24 +855,6 @@ Both work similarly, but the class you choose depends upon your needs.
 - If you require multiple concurrent operations/connections -> `SurrealConnectionManager`
 - If you need a simpler interface for a single connection -> `SurQLClient`
 
-#### SurQLClient
-
-SurQL also provides a `SurQLClient` that wraps the connection manager and provides a more convenient interface for authentication and session management for lighter use cases.
-Useful for accessing all of SurQL's features from a single client instance or when first working with the query builder.
-
-```typescript
-// Create SurQL client with connection manager
-const client = new SurQLClient(config)
-
-// Use the client for queries
-const users = await client.query<UserRaw, User>('users')
-  .where({ active: true })
-  .map(mapUser)
-  .execute()
-
-console.log('Success:', users)
-```
-
 #### SurrealConnectionManager
 
 SurQL provides a `SurrealConnectionManager` to handle connection pooling and management automatically. This allows you to reuse connections across multiple operations without worrying about connection lifecycle.
@@ -908,47 +879,6 @@ await connectionProvider.close()
 
 ---
 
-### Examples
-
----
-
-Examples are available in the `examples/` directory. They assume you have a SurrealDB instance and the necessary database/schema set up.
-
-```bash
-# Run a specific example
-deno run -A examples/basicCrud.ts
-```
-
----
-
-## 🤓 Contributing
-
----
-
-Want to contribute? Please see my ***non-existing*** [Contributing Guidelines](./CONTRIBUTING.md) for details. For now, just open an issue or PR with your ideas!
-
-### Local Development Setup
-
-Clone the repository and make your changes in the `src` directory. Provide clear commit messages and follow the project's coding style.
-
-Clone the repository. Tasks are defined in the `deno.json` file.
-
-```bash
-# Clone the repository
-git clone https://github.com/albedosehen/surql.git
-cd surql
-```
-
-### Tasks & Testing
-
-You should run these yourself before pushing to the repository. GitHub actions will also run these tasks automatically to check the code.
-
-- `deno check` to check for type errors
-- `deno lint` to run the linter
-- `deno fmt` to format the code
-- `deno task test` to run the tests
-
----
 
 ## License
 
@@ -956,14 +886,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-### ❤️ Acknowledgments
+***Note:** I am not affiliated with SurrealDB or Deno. This is an independent project built to enhance the SurrealDB TypeScript experience.*
 
-- Built for the [SurrealDB](https://surrealdb.com/) ecosystem
-- Designed for [Deno](https://deno.land/) and [Node.js](https://nodejs.org/) 🦖🟢
-- Inspired by modern query builders (LINQ, SQLAlchemy, etc.)
-
-***Note:** I am not affiliated with SurrealDB or Deno. This is an independent project built to enhance the SurrealDB experience for developers using Deno.*
-
----
 
 ![Static Badge](https://img.shields.io/badge/made_with_%E2%9D%A4%EF%B8%8F-green)
