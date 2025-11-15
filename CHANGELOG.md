@@ -8,6 +8,12 @@
   - Introduced the ability to define a custom `RecordId` for SurQL `write` operations.
   - Updated the `upsert` operations to accept custom `RecordId` values.
 
+### Fixed - Bug Fixes in v0.3.0
+
+- **Environment Variable Access Issue**
+  - Fixed environment variable access issue in `isProductionEnvironment` function to handle cases where environment variables are not accessible
+  - Updated test runner configuration to include `--allow-env` flag for proper error handling
+
 ## [0.2.5] - 2025-07-15
 
 - **Updated**: Minor updates to documentation.
