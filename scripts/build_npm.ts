@@ -19,6 +19,9 @@ await build({
     author: {
       name: 'oneiriq',
     },
+    publishConfig: {
+      access: 'public',
+    },
     repository: {
       type: 'git',
       url: 'git+https://github.com/oneiriq/surql.git',
@@ -43,10 +46,7 @@ await build({
     },
     dependencies: {
       'surrealdb': '^1.3.2',
-    },
-    devDependencies: {
-      '@types/node': '^20.0.0',
-    },
+    }
   },
   postBuild() {
     // Copy important files to npm directory
