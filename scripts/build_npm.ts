@@ -13,7 +13,7 @@ await build({
   },
   package: {
     name: '@oneiriq/surql',
-    version: Deno.args[0] || '0.2.5',
+    version: Deno.args[0] || '0.3.2',
     description: 'A modern, type-safe query builder for SurrealDB designed for Deno and Node.js',
     license: 'MIT',
     author: {
