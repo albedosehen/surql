@@ -236,7 +236,6 @@ export class ReadQL<R extends { id: RecordId }, T = unknown> extends QueryBuilde
    */
   having(conditionOrField: string, operator?: Op, value?: unknown): this {
     if (operator !== undefined && value !== undefined) {
-      this.validateFieldName(conditionOrField)
       const paramName = `h${this.havingConditions.length}`
       this.params[paramName] = value
       this.havingConditions.push(`${conditionOrField} ${operator} $${paramName}`)
