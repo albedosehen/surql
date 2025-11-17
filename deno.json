@@ -1,7 +1,7 @@
 {
 	"lock": true,
 
-	"name": "@albedosehen/surql",
+	"name": "@oneiriq/surql",
 	"version": "0.3.0",
 	"license": "MIT",
 	"exports": "./mod.ts",
