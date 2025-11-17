@@ -142,7 +142,7 @@ try {
   /**
    * Using a serializer, we reduce boilerplate and improve maintainability.
    *
-   * ✅ WORKS in both Node.js and Deno - explicit type parameters provided:
+   * WORKS in both Node.js and Deno - explicit type parameters provided:
    */
   const serializer = createSerializer()
   const postB = await client.query<PostRaw, Serialized<PostRaw>>('posts')
@@ -169,7 +169,7 @@ try {
 
   if (!postB) { throw new Error('No published posts found') }
 
-  // ✅ Explicit type parameters ensure Node.js compatibility
+  // Explicit type parameters ensure Node.js compatibility
   const author = await client.query<AuthorRaw, Serialized<AuthorRaw>>('users')
     .where({ id: postB.authorId })
     .map((raw: AuthorRaw): Serialized<AuthorRaw> => ({
@@ -182,7 +182,7 @@ try {
 
   if (!author) { throw new Error('Author not found for the post') }
 
-  // ✅ Using explicit types with a separate mapper function
+  // Using explicit types with a separate mapper function
   const comments = await client.query<CommentRaw, Comment>('comments')
     .where({ postId: postB.id })
     .map(mapComment)
