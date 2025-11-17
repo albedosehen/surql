@@ -71,5 +71,5 @@
 		"surrealdb": "npm:surrealdb@1.3.2"
 	},
 
-	"exclude": ["dist/", "npm/"]
+	"exclude": ["dist/", "npm/", "examples/"]
 }

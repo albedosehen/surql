@@ -10,7 +10,7 @@ import {
   RecordId,
   Serialized,
   SurQLClient
-  } from '@albedosehen/surql';
+  } from '@oneiriq/surql';
 
 /**
  * tagModel.ts

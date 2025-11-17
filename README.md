@@ -1,7 +1,7 @@
 # SurQL - SurrealDB Query Builder
 
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/dotwin/dotwin)
-[![JSR Version](https://img.shields.io/jsr/v/@albedosehen/surql)](https://jsr.io/@albedosehen/surql)
+[![JSR Version](https://img.shields.io/jsr/v/@oneiriq/surql)](https://jsr.io/@oneiriq/surql)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 I built SurQL to be a modern, type-safe query builder for SurrealDB available for Deno and Node.js. It provides a fluent interface for building complex queries using native TypeScript. It also aims to simplify client instantiation, ease data manipulation, and improve the security posture for developers and users using sanitization techniques. This library is designed to work seamlessly with both Deno and Node.js runtimes, leveraging native Promise support and TypeScript capabilities.
@@ -68,21 +68,21 @@ Don't know what SurrealDB is? [Learn more about the modern database here!](https
 For Node.js projects, install via npm, yarn, or pnpm:
 
 ```bash
-npm install @albedosehen/surql
+npm install @oneiriq/surql
 ```
 
 ```bash
-yarn add @albedosehen/surql
+yarn add @oneiriq/surql
 ```
 
 ```bash
-pnpm add @albedosehen/surql
+pnpm add @oneiriq/surql
 ```
 
 Then import in your project:
 
 ```typescript
-import { SurQLClient, query, SurrealConnectionManager } from '@albedosehen/surql'
+import { SurQLClient, query, SurrealConnectionManager } from '@oneiriq/surql'
 ```
 
 #### Install from JSR (Deno)
@@ -90,7 +90,7 @@ import { SurQLClient, query, SurrealConnectionManager } from '@albedosehen/surql
 In your Deno project, import SurQL directly from JSR:
 
 ```typescript
-import { query, SurrealConnectionManager } from "jsr:@albedosehen/surql"
+import { query, SurrealConnectionManager } from "jsr:@oneiriq/surql"
 ```
 
 **Optional:**
@@ -99,7 +99,7 @@ Set up an alias in your `deno.json` for simpler imports:
 ```json
 {
   "imports": {
-    "surql": "jsr:@albedosehen/surql"
+    "surql": "jsr:@oneiriq/surql"
   }
 }
 ```

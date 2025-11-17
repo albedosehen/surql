@@ -1,4 +1,4 @@
-import { SurQLClient, SortDirection, Op } from '@albedosehen/surql'
+import { SurQLClient, SortDirection, Op } from '@oneiriq/surql'
 
 const client = new SurQLClient({
   database: Deno.env.get('DB_DATABASE') || 'db',
@@ -11,7 +11,7 @@ const client = new SurQLClient({
   useSSL: false,
 })
 
-// TODO(@albedosehen): Clarity on the `signin` method usage vs the constructor options
+// TODO(@oneiriq): Clarity on the `signin` method usage vs the constructor options
 const token = await client.signin({
   type: 'scope',
   namespace: 'myapp',

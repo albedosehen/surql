@@ -1,4 +1,4 @@
-import { SurQLClient } from '@albedosehen/surql'
+import { SurQLClient } from '@oneiriq/surql'
 
 // Setup connection
 const client = new SurQLClient({
@@ -13,17 +13,17 @@ const client = new SurQLClient({
 })
 
 // Example 1: Auto-generated ID (current behavior)
-const user1 = await client.create('users', { 
-  name: 'John Doe', 
-  email: 'john@example.com' 
+const user1 = await client.create('users', {
+  name: 'John Doe',
+  email: 'john@example.com'
 }).execute()
 
 console.log('Auto-generated ID user:', user1)
 
 // Example 2: Explicit ID via withId() method
-const user2 = await client.create('users', { 
-  name: 'Jane Smith', 
-  email: 'jane@example.com' 
+const user2 = await client.create('users', {
+  name: 'Jane Smith',
+  email: 'jane@example.com'
 })
   .withId('user:jane-smith')
   .execute()
@@ -31,10 +31,10 @@ const user2 = await client.create('users', {
 console.log('Explicit ID user:', user2)
 
 // Example 3: ID from data object
-const user3 = await client.create('users', { 
+const user3 = await client.create('users', {
   id: 'user:bob-johnson',
-  name: 'Bob Johnson', 
-  email: 'bob@example.com' 
+  name: 'Bob Johnson',
+  email: 'bob@example.com'
 }).execute()
 
 console.log('ID from data user:', user3)

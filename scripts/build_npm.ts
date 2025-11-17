@@ -12,21 +12,21 @@ await build({
     deno: true,
   },
   package: {
-    name: '@albedosehen/surql',
+    name: '@oneiriq/surql',
     version: Deno.args[0] || '0.2.5',
     description: 'A modern, type-safe query builder for SurrealDB designed for Deno and Node.js',
     license: 'MIT',
     author: {
-      name: 'albedosehen',
+      name: 'oneiriq',
     },
     repository: {
       type: 'git',
-      url: 'git+https://github.com/albedosehen/surql.git',
+      url: 'git+https://github.com/oneiriq/surql.git',
     },
     bugs: {
-      url: 'https://github.com/albedosehen/surql/issues',
+      url: 'https://github.com/oneiriq/surql/issues',
     },
-    homepage: 'https://github.com/albedosehen/surql#readme',
+    homepage: 'https://github.com/oneiriq/surql#readme',
     keywords: [
       'surrealdb',
       'query-builder',
@@ -75,5 +75,5 @@ await build({
   },
 })
 
-console.log('\n✅ NPM package built successfully in ./npm directory')
-console.log('📦 To publish: cd npm && npm publish\n')
+console.log('\nNPM package built successfully in ./npm directory')
+console.log('To publish: cd npm && npm publish\n')

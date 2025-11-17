@@ -80,7 +80,7 @@ export class CreateQL<R extends { id: RecordId }, T = unknown> extends QueryBuil
 
     const mappedResult = this.mapResults(record, true)
 
-    // TODO(@albedosehen): Handle multiple records edge-case if I encounter it
+    // TODO(@oneiriq): Handle multiple records edge-case if I encounter it
     // Expect a single result for create operations
     return Array.isArray(mappedResult) ? mappedResult[0] : mappedResult
   }

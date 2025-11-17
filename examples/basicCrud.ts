@@ -1,4 +1,4 @@
-import { SurQLClient, SortDirection, Op } from '@albedosehen/surql'
+import { SurQLClient, SortDirection, Op } from '@oneiriq/surql'
 
 // Setup connection
 const client = new SurQLClient({

@@ -1,4 +1,4 @@
-import { Serialized, createSerializer, RecordId, query, SurrealConnectionManager } from "@albedosehen/surql";
+import { Serialized, createSerializer, RecordId, query, SurrealConnectionManager } from "@oneiriq/surql";
 
 // Setup connection
 const conn = new SurrealConnectionManager({

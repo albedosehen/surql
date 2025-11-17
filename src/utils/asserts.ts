@@ -1,4 +1,4 @@
-// TODO(@albedosehen): Look into replacing redundant functionality with @std/assert
+// TODO(@oneiriq): Look into replacing redundant functionality with @std/assert
 import { PATTERNS } from '../constants.ts'
 import type { AnyFn } from '../crud/types.ts'
 
