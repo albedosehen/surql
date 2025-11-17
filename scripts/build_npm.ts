@@ -13,11 +13,14 @@ await build({
   },
   package: {
     name: '@oneiriq/surql',
-    version: Deno.args[0] || '0.2.5',
+    version: Deno.args[0] || '0.3.2',
     description: 'A modern, type-safe query builder for SurrealDB designed for Deno and Node.js',
     license: 'MIT',
     author: {
       name: 'oneiriq',
+    },
+    publishConfig: {
+      access: 'public',
     },
     repository: {
       type: 'git',
@@ -43,10 +46,7 @@ await build({
     },
     dependencies: {
       'surrealdb': '^1.3.2',
-    },
-    devDependencies: {
-      '@types/node': '^20.0.0',
-    },
+    }
   },
   postBuild() {
     // Copy important files to npm directory
