@@ -48,9 +48,17 @@ const mapUser = (user: User): SerializedUser & {
   age: new Date().getFullYear() - user.birth_year
 })
 
+// IMPORTANT: Explicit type parameters are required for Node.js compatibility
+// Node.js TypeScript only infers the minimal constraint `{ id: RecordId }` without explicit generics
+// WORKS in both Node.js and Deno:
 const users = await query<User, SerializedUser & { age: number }>(conn, 'user_account')
   .map(mapUser)
   .execute()
+
+// FAILS in Node.js (TypeScript inference issue):
+// const users = await query(conn, 'user_account')
+//   .map(mapUser)  // Type error: mapUser expects User, but TypeScript infers only { id: RecordId }
+//   .execute()
 
 console.log('Users with Age (Using Serializer):', users)
 
