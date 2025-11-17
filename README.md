@@ -729,6 +729,75 @@ const rawUsers = await query<UserRaw>(connectionProvider, userTable, { warnings:
   .execute() // Suppress warning with explicit raw data usage
 ```
 
+### A Note About Node.js
+
+Typescript type inference in Node.js is more conservative and thus will complain if you do not specify `<T>`.
+
+For example, when using the `.query()` or `map()` functions, if you do not define `.query<T, Serialized<T>>()` the Node.js Typescript compiler will complain.
+
+Node.js type inference only infers the minimal constraint `{ id: RecordId }` when generic type parameters are not explicitly provided. This causes type errors when using `.map()` with mapper functions that expect the full type.
+
+In Deno, TypeScript's type inference works correctly and infers the full type, allowing `.query()` or `.map()` to work without explicit type parameters.
+
+#### Best Practice Examples
+
+```typescript
+// WORKS in Node.js (and Deno)
+const users = await client.query<UserRaw, SerializedUser>('users')
+  .map(mapUser)
+  .execute()
+
+// FAILS in Node.js (but works in Deno)
+const users = await client.query('users')
+  .map(mapUser)  // Type error: mapUser expects UserRaw, but TypeScript infers only { id: RecordId }
+  .execute()
+```
+
+```typescript
+import { SurQLClient, Serialized, createSerializer, RecordId } from '@oneiriq/surql'
+
+interface User {
+  id: RecordId
+  username: string
+  email: string
+  created_at: Date
+}
+
+type SerializedUser = Serialized<User>
+
+// Without serializer
+const mapUser = (user: User): SerializedUser => ({
+  id: user.id.toString(),
+  username: user.username,
+  email: user.email,
+  created_at: user.created_at.toISOString()
+})
+
+// Be explicit with your typings
+const users = await client.query<User, SerializedUser>('users')
+  .map(mapUser)
+  .execute()
+
+// With serializer
+const serializer = createSerializer<User>()
+const transformedUsers = await client.query<User, Serialized<User>>('users')
+  .map((user) => ({
+    id: serializer.id(user),
+    username: user.username,
+    email: user.email,
+    created_at: serializer.date(user.created_at)
+  }))
+  .execute()
+
+// Or just get the raw data
+const rawUsers = await client.query<User>('users')
+  .execute()
+```
+
+For consistency, always specify generic type parameters when using the `.map()` function to ensure compatibility across runtimes.
+
+---
+
 ### Error Handling
 
 SurQL uses standard JavaScript Promise patterns with enhanced error types for easier troubleshooting and debugging.
@@ -879,14 +948,9 @@ await connectionProvider.close()
 
 ---
 
-
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
-
-***Note:** I am not affiliated with SurrealDB or Deno. This is an independent project built to enhance the SurrealDB TypeScript experience.*
-
-
 ![Static Badge](https://img.shields.io/badge/made_with_%E2%9D%A4%EF%B8%8F-green)
