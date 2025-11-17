@@ -110,6 +110,9 @@ try {
   /**
    *  The post constant uses manual transforms in an attempt to adhere to the defined model.
    *  It's noisy and error-prone, especially with nested structures.
+   *
+   *  IMPORTANT: Explicit type parameters <PostRaw, Post> are required for Node.js compatibility.
+   *  Without them, Node.js TypeScript only infers the minimal constraint { id: RecordId }.
    * */
   const postA = await client.query<PostRaw, Post>('posts')
     .where({ published: true })
@@ -136,7 +139,11 @@ try {
   if (!postA) { throw new Error('No published posts found') }
 
 
-  /** Using a serializer, we reduce boilerplate and improve maintainability */
+  /**
+   * Using a serializer, we reduce boilerplate and improve maintainability.
+   *
+   * ✅ WORKS in both Node.js and Deno - explicit type parameters provided:
+   */
   const serializer = createSerializer()
   const postB = await client.query<PostRaw, Serialized<PostRaw>>('posts')
     .where({ published: true })
@@ -162,6 +169,7 @@ try {
 
   if (!postB) { throw new Error('No published posts found') }
 
+  // ✅ Explicit type parameters ensure Node.js compatibility
   const author = await client.query<AuthorRaw, Serialized<AuthorRaw>>('users')
     .where({ id: postB.authorId })
     .map((raw: AuthorRaw): Serialized<AuthorRaw> => ({
@@ -174,6 +182,7 @@ try {
 
   if (!author) { throw new Error('Author not found for the post') }
 
+  // ✅ Using explicit types with a separate mapper function
   const comments = await client.query<CommentRaw, Comment>('comments')
     .where({ postId: postB.id })
     .map(mapComment)
